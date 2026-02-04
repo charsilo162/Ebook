@@ -6,8 +6,8 @@ return [
         'route' => 'home',
     ],
     [
-        'label' => 'Search',
-        'route' => 'search',
+        'label' => 'Book List',
+        'route' => 'book-list',
     ],
     [
         'label' => 'Profile',
@@ -16,5 +16,13 @@ return [
     [
         'label' => 'Contact us',
         'route' => 'contact',
+    ],
+    [
+        'label' => 'Dashboard',
+        'route' => 'dashboard',
+    ],
+    [
+        'label' => 'Category',
+        'route' => 'category',
     ],
 ];

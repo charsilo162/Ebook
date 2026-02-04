@@ -65,5 +65,55 @@
         ],
     ]"
 />
+<x-sections.trust-bar
+    :items="[
+        [
+            'title' => 'Free Delivery',
+            'description' => 'Get free shipping on all orders above NGN50,000 in Lagos and Abuja.',
+            'icon' => 'delivery',
+        ],
+        [
+            'title' => 'Secure Payment',
+            'description' => 'Your payments are protected with industry-grade security.',
+            'icon' => 'secure',
+        ],
+        [
+            'title' => '24/7 Support',
+            'description' => 'Our support team is always available to help you.',
+            'icon' => 'support',
+        ],
+    ]"
+/>
+
+<x-sections.site-footer
+    :columns="[
+        [
+            'Corporate Info',
+            'Accessibility',
+            'Jobs',
+            
+        ],
+        [
+            'NBC App',
+            'Peacock',
+            'Advertise',
+            'Closed Captioning',
+        ],
+        [
+           
+            'FAQ',
+            'Casting',
+            'Contact Us',
+           
+        ],
+        [
+            'Parental Guidelines and TV Ratings',
+            'Video Viewing Policy',
+            'Viewer Panel',
+            'Shop',
+        ],
+    ]"
+/>
+
 
 </x-layouts.app>
