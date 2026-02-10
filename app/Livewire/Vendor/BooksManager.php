@@ -4,6 +4,7 @@ namespace App\Livewire\Vendor;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Services\ApiService;
+use Illuminate\Support\Facades\Log;
 
 class BooksManager extends Component
 {
@@ -15,6 +16,8 @@ class BooksManager extends Component
     public $variants = []; 
     public $step = 1;
     public $totalSteps = 3;
+    public $categories = []; 
+    public $categorySearch = '';
 
     public $books = [];
 
@@ -35,10 +38,48 @@ class BooksManager extends Component
         {
             $this->loadBooks();
             $this->addVariant(); // Starts with one variant row
+            $this->loadCategories();
         }
    
+        public function loadCategories()
+        {
+            // Assuming your API returns ['data' => [['id' => 1, 'name' => 'Fiction'], ...]]
+            $response = $this->api->get('categories');
+            
+            // Normalize the data (handling potential 'data' wrapper from API)
+            $this->categories = $response['data'] ?? $response ?? [];
+        }
+    public function getFilteredCategoriesProperty()
+            {
+                // 1. Convert to collection if it isn't one
+                $collection = collect($this->categories);
 
+                if (empty($this->categorySearch)) {
+                    return $collection;
+                }
 
+                $searchTerm = strtolower($this->categorySearch);
+
+                return $collection->filter(function ($category) use ($searchTerm) {
+                    // Handle both object and array formats
+                    $name = is_array($category) ? ($category['name'] ?? '') : ($category->name ?? '');
+                    return str_contains(strtolower($name), $searchTerm);
+                });
+            }
+
+     public function updatedCategorySearch($value)
+            {
+                if (strlen($value) < 2) {
+                    $this->categories = []; // Don't search for just 1 letter
+                    return;
+                }
+
+                // Call your API with a search query
+                // Endpoint likely looks like: /api/categories?search=fiction
+                $response = $this->api->get("categories?search={$value}");
+                
+                $this->categories = $response['data'] ?? $response ?? [];
+            }
    public function nextStep()
         {
             if ($this->step == 1) {
@@ -60,21 +101,62 @@ class BooksManager extends Component
             $this->step--;
         }
 
-        public function addVariant()
-        {
-            $this->variants[] = [
-                'type' => 'physical', 
-                'price' => '', 
-                'discount_price' => '', 
-                'stock' => 0, 
-                'file' => null
-            ];
-        }
+
     public function removeVariant($index)
         {
             unset($this->variants[$index]);
             $this->variants = array_values($this->variants);
         }
+
+        public function updated($propertyName)
+                {
+                    // If the user changes a type (e.g., variants.0.type)
+                    if (str_contains($propertyName, 'variants') && str_ends_with($propertyName, '.type')) {
+                        preg_match('/variants\.(\d+)\.type/', $propertyName, $matches);
+                        $index = $matches[1];
+                        
+                        if ($this->variants[$index]['type'] === 'digital') {
+                            $this->variants[$index]['stock'] = 0; // Clear stock for digital
+                        } else {
+                            $this->variants[$index]['file'] = null; // Clear file for physical
+                        }
+                        
+                        // Clear any previous duplicate errors when they change the type
+                        $this->resetValidation('variants');
+                    }
+                }
+
+    public function addVariant()
+        {
+            if (count($this->variants) >= 2) {
+                $this->addError('variants', 'A book can only have one Physical and one Digital format.');
+                return;
+            }
+
+            $this->variants[] = [
+                'type' => count($this->variants) === 0 ? 'physical' : ($this->variants[0]['type'] === 'physical' ? 'digital' : 'physical'), 
+                'price' => 0, // Changed from '' to 0
+                'discount_price' => 0, // Changed from '' to 0
+                'stock' => 0, 
+                'file' => null
+            ];
+        }
+                // public function addVariant()
+                //     {
+                //         // Prevent adding more than 2 variants
+                //         if (count($this->variants) >= 2) {
+                //             $this->addError('variants', 'A book can only have one Physical and one Digital format.');
+                //             return;
+                //         }
+
+                //         $this->variants[] = [
+                //             'type' => count($this->variants) === 0 ? 'physical' : ($this->variants[0]['type'] === 'physical' ? 'digital' : 'physical'), 
+                //             'price' => '', 
+                //             'discount_price' => '', 
+                //             'stock' => 0, 
+                //             'file' => null
+                //         ];
+                //     }
     public function confirmDelete($bookId)
     {
         $this->deletingBookId = $bookId;
@@ -102,6 +184,7 @@ class BooksManager extends Component
         {
             $response = $this->api->get('books?limit=12');
             $books = $response['data'] ?? $response ?? [];
+            
 
             $this->books = collect($books)
                 ->filter(fn ($book) => is_array($book) && isset($book['id']))
@@ -114,9 +197,11 @@ class BooksManager extends Component
 
         public function openModal($bookId = null)
                 {
+                
                     $this->resetValidation();
                     $this->resetForm();
                     $this->step = 1; // Always reset to step 1 when opening
+                    $this->categorySearch = '';
 
                     if ($bookId) {
                         $this->editingBookId = $bookId;
@@ -131,14 +216,23 @@ class BooksManager extends Component
     protected function fillForm($bookId)
         {
             $book = collect($this->books)->firstWhere('id', $bookId);
+                if (!$book){
+                    logger("Book not found for ID: " . $bookId);
+                    return;
+                } 
 
-            if (!$book) {
-                return;
-            }
+                // 1. Set the ID
+                $this->category_id = isset($book->category_id) ? (string)$book->category_id : (string)($book->category->id ?? '');
+
+                // 2. IMPORTANT: If we are editing, we must manually add the current 
+                // category to the list so the dropdown can show its name
+                if (isset($book->category)) {
+                    $this->categories = [$book->category]; 
+                }
 
             $this->title       = $book->title ?? '';
             $this->author_name = $book->author_name ?? $book->author ?? '';
-            $this->category_id = $book->category_id ?? $book->category->id ?? null;
+            // $this->category_id = $book->category_id ?? $book->category->id ?? null;
             $this->description = $book->description ?? '';
 
             // Map existing formats/variants from API → form structure
@@ -155,7 +249,7 @@ class BooksManager extends Component
                 ->toArray();
         }
 
-        protected function resetForm()
+    protected function resetForm()
         {
             $this->reset([
                 'title',
@@ -163,14 +257,16 @@ class BooksManager extends Component
                 'category_id',
                 'description',
                 'cover_image',
-                'editingBookId'
+                'editingBookId',
             ]);
+
+            $this->variants = [];
         }
+
 
     public function save()
         {
-            //dd('yes');
-            // 1. Validation
+            // 1. Local Validation
             $this->validate([
                 'title' => 'required|string|max:255',
                 'author_name' => 'required|string|max:255',
@@ -180,7 +276,15 @@ class BooksManager extends Component
                 'cover_image' => $this->editingBookId ? 'nullable|image|max:2048' : 'required|image|max:2048',
             ]);
 
-            // 2. Transform standard data into your ApiService's Multipart Format
+            // Check for duplicate types locally before calling API
+            $types = collect($this->variants)->pluck('type');
+            if ($types->count() !== $types->unique()->count()) {
+                $this->addError('variants', 'You cannot have two variants of the same type (e.g., two physical copies).');
+                $this->step = 2; 
+                return;
+            }
+
+            // 2. Build Multipart Data
             $formData = [
                 ['name' => 'title',        'contents' => $this->title],
                 ['name' => 'author_name',  'contents' => $this->author_name],
@@ -188,7 +292,7 @@ class BooksManager extends Component
                 ['name' => 'description',  'contents' => $this->description],
             ];
 
-            // 3. Add Cover Image as a File Resource
+            // 3. Cover Image
             if ($this->cover_image && !is_string($this->cover_image)) {
                 $formData[] = [
                     'name'     => 'cover_image',
@@ -196,47 +300,52 @@ class BooksManager extends Component
                     'filename' => $this->cover_image->getClientOriginalName()
                 ];
             }
-            // dd('yes');
-            // 4. Add Nested Variants (Pricing, Type, and E-book files)
+
+            // 4. Variants (Crucial Change Here)
             foreach ($this->variants as $index => $variant) {
+                // !!! IMPORTANT: If editing, we MUST send the variant ID so the backend 
+                // knows this isn't a "new" duplicate variant.
+                if (isset($variant['id'])) {
+                    $formData[] = ['name' => "variants[$index][id]", 'contents' => $variant['id']];
+                }
+
                 $formData[] = ['name' => "variants[$index][type]",           'contents' => $variant['type']];
                 $formData[] = ['name' => "variants[$index][price]",          'contents' => $variant['price']];
                 $formData[] = ['name' => "variants[$index][discount_price]", 'contents' => $variant['discount_price'] ?? ''];
-                // $formData[] = ['name' => "variants[$index][stock_quantity]", 'contents' => $variant['stock'] ?? 0];
-                $formData[] = ['name' => "variants[$index][stock]", 'contents' => $variant['stock'] ?? 0];
-                // If it's a digital book and a file was uploaded in Step 2
+                $formData[] = ['name' => "variants[$index][stock]",          'contents' => $variant['stock'] ?? 0];
+
+                // E-book file handling
                     if (isset($variant['file']) && !is_string($variant['file'])) {
+                        // Determine the MIME type
+                        $mimeType = $variant['file']->getMimeType(); // e.g., application/pdf
+
                         $formData[] = [
-                            // Ensure this string matches exactly: variants.index.file
                             'name'     => "variants[$index][file]", 
                             'contents' => fopen($variant['file']->getRealPath(), 'r'),
-                            'filename' => $variant['file']->getClientOriginalName()
+                            'filename' => $variant['file']->getClientOriginalName(),
+                            // ADD THIS: explicitly set the header for this part
+                            'headers'  => [
+                                'Content-Type' => $mimeType
+                            ]
                         ];
                     }
-                // if (isset($variant['file']) && !is_string($variant['file'])) {
-                //     $formData[] = [
-                //         'name'     => "variants[$index][file]",
-                //         'contents' => fopen($variant['file']->getRealPath(), 'r'),
-                //         'filename' => $variant['file']->getClientOriginalName()
-                //     ];
-                // }
             }
-
-            // 5. API Call using your existing service methods
+           
+            // 5. API Call
             $response = $this->editingBookId
                 ? $this->api->putWithFile("books/{$this->editingBookId}", $formData)
                 : $this->api->postWithFile('books', $formData);
-              //  dd( $response);
-            // 6. Handle Errors
+           // dd($response);
+            // 6. Handle Errors from API
             if (isset($response['errors'])) {
                 foreach ($response['errors'] as $field => $messages) {
                     $this->addError($field, $messages[0]);
                 }
                 
-                // Jump back to the step that has the error
+                // Auto-navigate to the step with the error
                 if ($this->hasError('title') || $this->hasError('author_name')) {
                     $this->step = 1;
-                } elseif (collect($this->getErrorBag()->keys())->contains(fn($key) => str_contains($key, 'variants'))) {
+                } else {
                     $this->step = 2;
                 }
                 return;
@@ -247,16 +356,15 @@ class BooksManager extends Component
             $this->resetForm();
             $this->step = 1; 
             $this->loadBooks();
-
             session()->flash('success', 'Book saved successfully!');
         }
-    public function render()
-    {
-           return view('livewire.vendor.books-manager', [
-        'books' => $this->books,
-    ]);
-       
-        // ->layout('components.layouts.dashboard');;
-    }
+     public function render()
+            {
+                return view('livewire.vendor.books-manager', [
+                'books' => $this->books,
+            ]);
+            
+                // ->layout('components.layouts.dashboard');;
+            }
 }
 

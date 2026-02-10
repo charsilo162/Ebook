@@ -21,17 +21,21 @@
                    shadow-xl ring-1 ring-black/5 p-8 md:p-10"
         >
 
-            {{-- Image --}}
-            <div class="relative">
-                <img
-                    src="{{ asset($image) }}"
-                    alt="{{ $title }}"
-                    class="w-full rounded-xl object-cover shadow-md"
-                />
+            {{-- Image card --}}
+            <div class="relative md:pr-6">
+                <div class="relative overflow-hidden rounded-2xl
+                            bg-white shadow-lg ring-1 ring-black/5
+                            p-3">
+                    <img
+                        src="{{ asset($image) }}"
+                        alt="{{ $title }}"
+                        class="w-full aspect-[4/5] rounded-xl object-cover"
+                    />
+                </div>
             </div>
 
             {{-- Content --}}
-            <div class="flex flex-col justify-center space-y-6">
+            <div class="flex flex-col justify-center space-y-8 md:space-y-10 md:pl-6">
 
                 {{-- Subtitle --}}
                 @if ($subtitle)
@@ -43,7 +47,7 @@
 
                 {{-- Title --}}
                 <h1 class="text-3xl md:text-4xl font-extrabold text-zinc-900 leading-tight">
-                    {{ $title }}
+                   <span class="text-purple-600">TITLE </span> :  {{ $title }}
                 </h1>
 
                 {{-- Meta --}}
@@ -58,7 +62,7 @@
                 {{-- Description --}}
                 @if ($description)
                     <p class="text-zinc-600 leading-relaxed max-w-xl">
-                        {{ $description }}
+                      <span class="text-purple-600">DESCRIPTION </span> :  {{ $description }}
                     </p>
                 @endif
 
@@ -68,7 +72,7 @@
                         @foreach ($tags as $tag)
                             <x-ui.pill-button
                                 :label="$tag['label']"
-                                :color="$tag['color'] ?? 'zinc'"
+                                :color="$tag['color'] ?? 'zinc-800'"
                             />
                         @endforeach
                     </div>
@@ -82,7 +86,6 @@
                 @endif
 
             </div>
-
         </div>
     </div>
 </section>

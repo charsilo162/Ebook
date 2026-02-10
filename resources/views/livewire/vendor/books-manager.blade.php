@@ -15,19 +15,18 @@
         {{-- @php
             dd($books);
         @endphp --}}
-       @forelse ($books as $book)
-              
-                    <x-book.book-card
-                        :book="$book"
-                        :showActions="true"
-                        onEdit="openModal({{ $book->id }})"
-                        onDelete="confirmDelete({{ $book->id }})"
-                        wire:key="book-{{ $book->id }}"
-                    />
-               
-            @empty
-                <p class="text-zinc-500">No books uploaded yet.</p>
-            @endforelse
+    @forelse ($books as $book)
+            <x-book.book-card
+                :book="$book"
+                :showActions="true"
+                {{-- ADD SINGLE QUOTES AROUND THE ID BELOW --}}
+                onEdit="openModal('{{ $book->id }}')"
+                onDelete="confirmDelete('{{ $book->id }}')"
+                wire:key="book-{{ $book->id }}"
+            />
+        @empty
+            <p class="text-zinc-500">No books uploaded yet.</p>
+        @endforelse
 
     </div> 
 </section>
@@ -82,10 +81,47 @@
                         name="author_name"
                         wire:model.defer="author_name" />
 
-                    <x-form.input
-                        label="Category ID"
-                        name="category_id"
-                        wire:model.defer="category_id" />
+                   <div class="space-y-1">
+    <label class="block text-xs font-bold uppercase tracking-wide text-zinc-600">
+        Category
+    </label>
+    
+    <div class="rounded-xl border border-zinc-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-purple-200 focus-within:border-purple-500 transition">
+        {{-- Search Input - styled to look like a header --}}
+        <div class="relative mb-2">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input 
+                type="text" 
+                wire:model.live="categorySearch" 
+                placeholder="Type to filter..." 
+                class="w-full rounded-lg border-none bg-zinc-50 pl-8 py-1.5 text-xs focus:ring-0"
+            >
+        </div>
+
+        {{-- The actual Select - border removed to blend in --}}
+        <select
+            wire:model.defer="category_id"
+            class="w-full border-none p-0 text-sm focus:ring-0 cursor-pointer bg-transparent"
+            size="5" {{-- Makes it look more like a dropdown list --}}
+        >
+            <option value="" class="py-1">Select a Category</option>
+            @forelse($this->filteredCategories as $category)
+                @php 
+                    $catId = is_array($category) ? $category['id'] : $category->id;
+                    $catName = is_array($category) ? $category['name'] : $category->name;
+                @endphp
+                <option value="{{ $catId }}" class="py-1 px-2 hover:bg-purple-50 rounded">
+                    {{ $catName }}
+                </option>
+            @empty
+                <option disabled>No categories found...</option>
+            @endforelse
+        </select>
+    </div>
+    @error('category_id') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+</div>
 
                     <x-form.textarea
                         label="Description"
@@ -105,13 +141,24 @@
 
                     <div class="flex items-center justify-between">
                         <h4 class="font-medium text-zinc-700">Pricing & Formats</h4>
-
-                        <button
-                            type="button"
-                            wire:click="addVariant"
-                            class="text-xs font-bold text-purple-600 uppercase hover:underline">
-                            + Add Format
-                        </button>
+                            @php
+                            $hasPhysical = collect($variants)->contains('type', 'physical');
+                            $hasDigital = collect($variants)->contains('type', 'digital');
+                            $canAddMore = count($variants) < 2;
+                        @endphp
+                        {{-- Show duplicate error message here --}}
+                        @error('variants')
+                            <span class="text-xs text-red-500 font-medium">
+                                {{ $message }}
+                            </span>
+                        @enderror
+                        @if($canAddMore)
+                            <button type="button" wire:click="addVariant" class="text-xs font-bold text-purple-600 uppercase hover:underline">
+                                + Add Format
+                            </button>
+                        @else
+                            <span class="text-[10px] text-zinc-400 italic">Maximum formats reached (Physical & Digital)</span>
+                        @endif
                     </div>
 
                     @foreach($variants as $index => $variant)
@@ -128,16 +175,28 @@
                         <div class="grid grid-cols-2 gap-3">
 
                             {{-- TYPE --}}
-                            <x-form.select
-                                label="Type"
-                                name="variants.{{ $index }}.type"
-                                wire:model="variants.{{ $index }}.type">
+                        @php
+                        // Check if other rows already used 'physical' or 'digital'
+                        $usedTypes = collect($variants)->pluck('type')->toArray();
+                    @endphp
 
-                                <option value="physical">Physical</option>
-                                <option value="digital">Digital</option>
+                    <x-form.select
+                        label="Type"
+                        name="variants.{{ $index }}.type"
+                        wire:model="variants.{{ $index }}.type"
+                    >
+                        {{-- A user can only select 'physical' if NO other row has it, 
+                            OR if THIS specific row is already the physical one --}}
+                        <option value="physical" 
+                            @if(in_array('physical', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'physical') disabled @endif>
+                            Physical (Hardcover) @if(in_array('physical', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'physical') — (Already Added) @endif
+                        </option>
 
-                            </x-form.select>
-
+                        <option value="digital" 
+                            @if(in_array('digital', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'digital') disabled @endif>
+                            Digital (E-Book) @if(in_array('digital', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'digital') — (Already Added) @endif
+                        </option>
+                    </x-form.select>
                             {{-- PRICE --}}
                             <x-form.input
                                 type="number"
@@ -149,22 +208,18 @@
 
 
                         {{-- DIGITAL --}}
-                        @if(($variants[$index]['type'] ?? '') === 'digital')
-
-                            <x-form.file
-                                label="E-book File (PDF/EPUB)"
-                                name="variants.{{ $index }}.file"
-                                wire:model="variants.{{ $index }}.file" />
-
+                        @if(($variants[$index]['type'] ?? 'physical') === 'digital')
+                            <div class="mt-2">
+                                <label class="text-xs font-bold text-zinc-500 uppercase">E-book File</label>
+                                <input type="file" wire:model="variants.{{ $index }}.file" class="text-xs mt-1">
+                                @error("variants.$index.file") <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
                         @else
-
-                            {{-- STOCK --}}
                             <x-form.input
                                 type="number"
                                 label="Stock Quantity"
                                 name="variants.{{ $index }}.stock"
                                 wire:model.defer="variants.{{ $index }}.stock" />
-
                         @endif
 
                     </div>
@@ -228,8 +283,7 @@
                                 <div class="flex justify-between text-xs py-1">
                                     <span>{{ ucfirst($v['type']) }} copy:</span>
                                     <span class="text-purple-400 font-bold">
-                                        ${{ number_format($v['price'] ?? 0, 2) }}
-                                    </span>
+                                    ${{ number_format((float)($v['price'] ?? 0), 2) }}                                    </span>
                                 </div>
                             @endforeach
                         </div>

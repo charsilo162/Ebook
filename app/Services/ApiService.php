@@ -184,9 +184,16 @@ class ApiService
         ];
     }
 
-    public function getCategoriesCount($search = null)
-    {
-        $params = $search ? ['search' => $search] : [];
-        return $this->get('categories/count', $params);
-    }
+   public function getFilteredBooks(array $filters = [])
+{
+    logger()->info('BOOK FILTERS SENT', $filters);
+
+    return $this->get('books', array_filter([
+        'search'      => $filters['search'] ?? null,
+        'category_id' => $filters['category_id'] ?? null,
+        'page'        => $filters['page'] ?? 1,
+        'per_page'    => $filters['per_page'] ?? 15,
+    ]));
+}
+
 }

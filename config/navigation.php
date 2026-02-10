@@ -25,4 +25,8 @@ return [
         'label' => 'Category',
         'route' => 'category',
     ],
+    [
+        'label' => 'Categoies',
+        'route' => 'category.books',
+    ],
 ];

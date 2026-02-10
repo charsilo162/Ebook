@@ -55,15 +55,18 @@
             {{ $book->author ?? '' }}
         </p>
 
-        <div class="flex items-center justify-between mt-3">
-            <span class="text-sm font-semibold text-purple-600">
-                ₦{{ number_format($book->starting_price ?? 0) }}
-            </span>
+        <div class="flex flex-wrap gap-1 mt-3">
+            @foreach($book->formats ?? [] as $format)
+                <span class="text-[10px] px-2 py-0.5 rounded-full {{ ($format['type'] ?? '') === 'digital' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }} font-medium">
+                    {{ ucfirst($format['type'] ?? '') }}
+                </span>
+            @endforeach
+        </div>
 
-          <span class="text-xs px-2 py-1 rounded-full bg-zinc-100 text-zinc-600">
-                {{ ucfirst($book->formats[0]['type'] ?? 'digital') }}
+        <div class="flex items-center justify-between mt-2">
+            <span class="text-sm font-bold text-zinc-900">
+                ₦{{ number_format($book->starting_price ?? 0) }}<span class="text-[10px] text-zinc-400 font-normal"> starting</span>
             </span>
-
         </div>
 
     </div>

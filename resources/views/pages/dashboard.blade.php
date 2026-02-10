@@ -1,42 +1,12 @@
 <x-layouts.dashboard title="Dashboard">
-
-    @php
-    $stats = [
-        [
-            'label' => 'Total Books',
-            'value' => '1,240',
-            'icon'  => 'book-open',
-            'color' => 'blue',
-        ],
-        [
-            'label' => 'Books Purchased',
-            'value' => '3,820',
-            'icon'  => 'shopping-cart',
-            'color' => 'green',
-        ],
-        [
-            'label' => 'Soft Copies',
-            'value' => '760',
-            'icon'  => 'device-tablet',
-            'color' => 'purple',
-        ],
-        [
-            'label' => 'Hard Copies',
-            'value' => '480',
-            'icon'  => 'archive-box',
-            'color' => 'orange',
-        ],
-    ];
-@endphp
-
-
     <div class="max-w-7xl mx-auto px-4 py-6 space-y-10">
+        <livewire:stats.stats-component />
+        <livewire:books.popular-books-component />
 
         {{-- ================== STATS OVERVIEW (REUSED) ================== --}}
-        <x-admin.stats-overview :stats="$stats" />
-
+      
         {{-- ================== POPULAR BOOKS ================== --}}
-        <section>
+        {{-- <section>
             <h2 class="text-lg font-bold mb-4">
                 Popularly Patronized
             </h2>
@@ -54,7 +24,7 @@
                     />
                 @endforeach
             </div>
-        </section>
+        </section> --}}
 
         {{-- ================== YOUR UPLOADS ================== --}}
         <section>

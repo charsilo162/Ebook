@@ -4,10 +4,19 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\UnifiedSignup;
 use App\Livewire\Vendor\Settings;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\MyLibraryController;
+use App\Http\Controllers\OrderController;
 
 // Route::get('/', function () {
 //     return view('welcome');
 
+
+
+
+// This route handles the main product landing page
+// URL will look like: /books/5?type=digital
 
 
 // });
@@ -26,3 +35,23 @@ Route::view('/profile', 'pages.home')->name('profile');
 //Route::view('/contact-us', 'pages.contact')->name('contact');
 // Route::view('/login', 'pages.home')->name('login');
 Route::view('/dashboard', 'pages.dashboard')->name('dashboard');
+Route::get('/categories', [CategoryController::class, 'show'])->name('category.books');
+
+
+Route::get('/books/{uuid}', [BookController::class, 'show'])->name('books.show');
+//Route::get('/books/{id}', [BookController::class, 'show'])->name('books.show');
+
+
+Route::middleware('sessionauth')->group(function () {
+    Route::get('/my-library', [MyLibraryController::class, 'show'])->name('library.index');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+    // User Library Page (The one you are building now)
+    // Route::get('/my-library', function () {
+    //     return view('user.my-library'); // This view will hold your Livewire component
+    // })->name('');
+
+    // Order Success / Details Page
+    // Route::get('/orders/{id}', function ($id) {
+    //     return view('user.order-details', ['orderId' => $id]);
+    // })->name('orders.show');
+});
