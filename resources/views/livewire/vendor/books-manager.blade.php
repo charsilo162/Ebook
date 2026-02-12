@@ -11,6 +11,23 @@
         </button>
     </div>
 
+
+<div>
+    @if (session()->has('success'))
+        <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    </div>
+
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {{-- @php
             dd($books);
@@ -82,46 +99,46 @@
                         wire:model.defer="author_name" />
 
                    <div class="space-y-1">
-    <label class="block text-xs font-bold uppercase tracking-wide text-zinc-600">
-        Category
-    </label>
+            <label class="block text-xs font-bold uppercase tracking-wide text-zinc-600">
+                Category
+            </label>
     
-    <div class="rounded-xl border border-zinc-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-purple-200 focus-within:border-purple-500 transition">
-        {{-- Search Input - styled to look like a header --}}
-        <div class="relative mb-2">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </div>
-            <input 
-                type="text" 
-                wire:model.live="categorySearch" 
-                placeholder="Type to filter..." 
-                class="w-full rounded-lg border-none bg-zinc-50 pl-8 py-1.5 text-xs focus:ring-0"
-            >
-        </div>
+            <div class="rounded-xl border border-zinc-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-purple-200 focus-within:border-purple-500 transition">
+                {{-- Search Input - styled to look like a header --}}
+                <div class="relative mb-2">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input 
+                        type="text" 
+                        wire:model.live="categorySearch" 
+                        placeholder="Type to filter..." 
+                        class="w-full rounded-lg border-none bg-zinc-50 pl-8 py-1.5 text-xs focus:ring-0"
+                    >
+                </div>
 
-        {{-- The actual Select - border removed to blend in --}}
-        <select
-            wire:model.defer="category_id"
-            class="w-full border-none p-0 text-sm focus:ring-0 cursor-pointer bg-transparent"
-            size="5" {{-- Makes it look more like a dropdown list --}}
-        >
-            <option value="" class="py-1">Select a Category</option>
-            @forelse($this->filteredCategories as $category)
-                @php 
-                    $catId = is_array($category) ? $category['id'] : $category->id;
-                    $catName = is_array($category) ? $category['name'] : $category->name;
-                @endphp
-                <option value="{{ $catId }}" class="py-1 px-2 hover:bg-purple-50 rounded">
-                    {{ $catName }}
-                </option>
-            @empty
-                <option disabled>No categories found...</option>
-            @endforelse
-        </select>
-    </div>
-    @error('category_id') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
-</div>
+                {{-- The actual Select - border removed to blend in --}}
+                <select
+                    wire:model.defer="category_id"
+                    class="w-full border-none p-0 text-sm focus:ring-0 cursor-pointer bg-transparent"
+                    size="5" {{-- Makes it look more like a dropdown list --}}
+                >
+                    <option value="" class="py-1">Select a Category</option>
+                    @forelse($this->filteredCategories as $category)
+                        @php 
+                            $catId = is_array($category) ? $category['id'] : $category->id;
+                            $catName = is_array($category) ? $category['name'] : $category->name;
+                        @endphp
+                        <option value="{{ $catId }}" class="py-1 px-2 hover:bg-purple-50 rounded">
+                            {{ $catName }}
+                        </option>
+                    @empty
+                        <option disabled>No categories found...</option>
+                    @endforelse
+                </select>
+            </div>
+            @error('category_id') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+        </div>
 
                     <x-form.textarea
                         label="Description"
@@ -161,73 +178,86 @@
                         @endif
                     </div>
 
-                    @foreach($variants as $index => $variant)
+                 @foreach($variants as $index => $variant)
+                        <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 relative space-y-3 shadow-sm">
+                            {{-- Remove Button --}}
+                            <button type="button" wire:click="removeVariant({{ $index }})"
+                                class="absolute top-2 right-2 text-zinc-400 hover:text-red-500 text-xl leading-none">
+                                &times;
+                            </button>
 
-                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 relative space-y-3 shadow-sm">
+                            <div class="grid grid-cols-2 gap-3">
+                                {{-- TYPE SELECTION --}}
+                                @php
+                                    $usedTypes = collect($variants)->pluck('type')->filter()->toArray();
+                                @endphp
 
-                        <button
-                            type="button"
-                            wire:click="removeVariant({{ $index }})"
-                            class="absolute top-2 right-2 text-zinc-400 hover:text-red-500 text-xl">
-                            ×
-                        </button>
+                                <x-form.select 
+                                    label="Format Type" 
+                                    name="variants.{{ $index }}.type" 
+                                    wire:model.live="variants.{{ $index }}.type"
+                                >
+                                    <option value="">-- Choose Format --</option>
+                                    
+                                    {{-- Physical Option --}}
+                                    <option value="physical" 
+                                        @if(in_array('physical', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'physical') disabled @endif>
+                                        Physical (Hardcover) @if(in_array('physical', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'physical') (Added) @endif
+                                    </option>
 
-                        <div class="grid grid-cols-2 gap-3">
+                                    {{-- Digital Option --}}
+                                    <option value="digital" 
+                                        @if(in_array('digital', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'digital') disabled @endif>
+                                        Digital (E-Book) @if(in_array('digital', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'digital') (Added) @endif
+                                    </option>
+                                </x-form.select>
 
-                            {{-- TYPE --}}
-                        @php
-                        // Check if other rows already used 'physical' or 'digital'
-                        $usedTypes = collect($variants)->pluck('type')->toArray();
-                    @endphp
-
-                    <x-form.select
-                        label="Type"
-                        name="variants.{{ $index }}.type"
-                        wire:model="variants.{{ $index }}.type"
-                    >
-                        {{-- A user can only select 'physical' if NO other row has it, 
-                            OR if THIS specific row is already the physical one --}}
-                        <option value="physical" 
-                            @if(in_array('physical', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'physical') disabled @endif>
-                            Physical (Hardcover) @if(in_array('physical', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'physical') — (Already Added) @endif
-                        </option>
-
-                        <option value="digital" 
-                            @if(in_array('digital', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'digital') disabled @endif>
-                            Digital (E-Book) @if(in_array('digital', $usedTypes) && ($variants[$index]['type'] ?? '') !== 'digital') — (Already Added) @endif
-                        </option>
-                    </x-form.select>
-                            {{-- PRICE --}}
-                            <x-form.input
-                                type="number"
-                                label="Price"
-                                name="variants.{{ $index }}.price"
-                                wire:model.defer="variants.{{ $index }}.price" />
-
-                        </div>
-
-
-                        {{-- DIGITAL --}}
-                        @if(($variants[$index]['type'] ?? 'physical') === 'digital')
-                            <div class="mt-2">
-                                <label class="text-xs font-bold text-zinc-500 uppercase">E-book File</label>
-                                <input type="file" wire:model="variants.{{ $index }}.file" class="text-xs mt-1">
-                                @error("variants.$index.file") <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                {{-- PRICE (Only shows if a type is selected) --}}
+                                <div @if(empty($variants[$index]['type'])) class="opacity-50 pointer-events-none" @endif>
+                                    <x-form.input 
+                                        type="number" 
+                                        label="Price" 
+                                        name="variants.{{ $index }}.price" 
+                                        wire:model.defer="variants.{{ $index }}.price" 
+                                        placeholder="0.00" />
+                                </div>
                             </div>
-                        @else
-                            <x-form.input
-                                type="number"
-                                label="Stock Quantity"
-                                name="variants.{{ $index }}.stock"
-                                wire:model.defer="variants.{{ $index }}.stock" />
-                        @endif
 
-                    </div>
+                            {{-- CONDITIONAL FIELDS BASED ON TYPE --}}
+                            @if(($variants[$index]['type'] ?? '') === 'digital')
+                                <div class="mt-2 p-3 bg-white rounded-xl border border-zinc-200 animate-in fade-in zoom-in-95 duration-200">
+                                    <label class="text-xs font-bold text-zinc-500 uppercase">Upload E-book (PDF/EPUB)</label>
+                                    <input type="file" wire:model="variants.{{ $index }}.file" class="block w-full text-xs mt-1 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                                    @error("variants.$index.file") <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                                </div>
 
-                    @endforeach
+                            @elseif(($variants[$index]['type'] ?? '') === 'physical')
+                                <div class="grid grid-cols-2 gap-3 mt-2 animate-in fade-in zoom-in-95 duration-200">
+                                    <x-form.input 
+                                        type="number" 
+                                        label="Stock" 
+                                        name="variants.{{ $index }}.stock" 
+                                        wire:model.defer="variants.{{ $index }}.stock" />
 
-                </div>
-                @endif
+                                    <x-form.select 
+                                        label="Bookshop" 
+                                        name="variants.{{ $index }}.bookshop_id" 
+                                        wire:model.defer="variants.{{ $index }}.bookshop_id"
+                                    >
+                                        <option value="">Select Location</option>
+                                        @foreach($bookshops as $shop)
+                                            <option value="{{ $shop['id'] ?? $shop->id }}">
+                                                {{ $shop['shop_name'] ?? $shop->shop_name }} ({{ $shop['city'] ?? $shop->city }})
+                                            </option>
+                                        @endforeach
+                                    </x-form.select>
+                                </div>
+                            @endif
+                        </div>
+                        @endforeach
+
+    </div>
+    @endif
 
 
                 {{-- ========================= --}}
@@ -349,31 +379,35 @@
     </x-modal>
 
 <x-modal wire:model="confirmingDelete" maxWidth="md">
-    <h3 class="text-lg font-semibold text-zinc-900 mb-4">
-        Delete Book
-    </h3>
+    <div class="p-6">
+        <h3 class="text-lg font-semibold text-zinc-900 mb-2">
+            Delete Book
+        </h3>
+        
+        <p class="text-sm text-zinc-500 mb-6">
+            Are you sure you want to delete this book? This action cannot be undone and all associated files will be removed.
+        </p>
 
-    <p class="text-zinc-600">
-        Are you sure you want to delete this book?
-        This action cannot be undone.
-    </p>
+        <div class="flex justify-end gap-3">
+            <button 
+                type="button" 
+                wire:click="$set('confirmingDelete', false)" 
+                class="px-4 py-2 text-sm font-bold text-zinc-500 hover:text-zinc-700 transition"
+            >
+                Cancel
+            </button>
 
-    <div class="flex justify-end gap-3 mt-6">
-        <button
-            wire:click="$set('confirmingDelete', false)"
-            class="px-4 py-2 rounded-lg border"
-        >
-            Cancel
-        </button>
-
-        <button
-            wire:click="deleteBook"
-            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
-        >
-            Delete
-        </button>
+            <button 
+                type="button" 
+                wire:click="deleteBook" 
+                wire:loading.attr="disabled"
+                class="px-6 py-2 bg-red-600 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-red-700 transition disabled:opacity-50"
+            >
+                <span wire:loading.remove wire:target="deleteBook">Yes, Delete Book</span>
+                <span wire:loading wire:target="deleteBook">Deleting...</span>
+            </button>
+        </div>
     </div>
 </x-modal>
-
 
 </div>

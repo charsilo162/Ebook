@@ -37,7 +37,7 @@
         ['title' => 'spiritual', 'count' => 1000, 'image' => 'storage/images/c8.jpg'],
     ]"
 />
-<x-sections.book-showcase
+{{-- <x-sections.book-showcase
     :sections="[
         [
             'title' => 'Discount Deals',
@@ -64,7 +64,9 @@
             ],
         ],
     ]"
-/>
+/> --}}
+<livewire:category.category-grid-manager />
+<livewire:books.showcase-manager />
 <x-sections.trust-bar
     :items="[
         [

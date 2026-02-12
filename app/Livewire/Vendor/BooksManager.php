@@ -18,6 +18,7 @@ class BooksManager extends Component
     public $totalSteps = 3;
     public $categories = []; 
     public $categorySearch = '';
+    public $bookshops = []; 
 
     public $books = [];
 
@@ -34,13 +35,22 @@ class BooksManager extends Component
         $this->api = $api;
     }
 
-  public function mount()
+
+
+    public function mount()
         {
             $this->loadBooks();
-            $this->addVariant(); // Starts with one variant row
             $this->loadCategories();
+            $this->loadBookshops(); // 2. Load shops on mount
+            $this->addVariant();
         }
    
+        public function loadBookshops()
+                {
+                    // Fetch from your BookshopController index route
+                    $response = $this->api->get('bookshops');
+                    $this->bookshops = $response['data'] ?? $response ?? [];
+                }
         public function loadCategories()
         {
             // Assuming your API returns ['data' => [['id' => 1, 'name' => 'Fiction'], ...]]
@@ -80,21 +90,29 @@ class BooksManager extends Component
                 
                 $this->categories = $response['data'] ?? $response ?? [];
             }
-   public function nextStep()
-        {
-            if ($this->step == 1) {
-                $this->validate([
-                    'title' => 'required|string',
-                    'author_name' => 'required',
-                    'category_id' => 'required',
-                ]);
+        public function nextStep()
+            {
+                if ($this->step == 1) {
+                    $this->validate([
+                        'title' => 'required',
+                        'author_name' => 'required',
+                        'category_id' => 'required',
+                    ]);
+                }
+
+                if ($this->step == 2) {
+                    $this->validate([
+                        'variants' => 'required|array|min:1',
+                        'variants.*.type' => 'required',
+                        'variants.*.price' => 'required|numeric|min:0',
+                        'variants.*.stock' => 'required_if:variants.*.type,physical',
+                        'variants.*.bookshop_id' => 'required_if:variants.*.type,physical',
+                        'variants.*.file' => 'required_if:variants.*.type,digital',
+                    ]);
+                }
+
+                $this->step++;
             }
-            if ($this->step == 2 && empty($this->variants)) {
-                $this->addError('variants', 'Please add at least one format.');
-                return;
-            }
-            $this->step++;
-        }
 
         public function prevStep()
         {
@@ -134,10 +152,12 @@ class BooksManager extends Component
             }
 
             $this->variants[] = [
-                'type' => count($this->variants) === 0 ? 'physical' : ($this->variants[0]['type'] === 'physical' ? 'digital' : 'physical'), 
+                // 'type' => count($this->variants) === 0 ? 'physical' : ($this->variants[0]['type'] === 'physical' ? 'digital' : 'physical'), 
+                'type' => '',
                 'price' => 0, // Changed from '' to 0
                 'discount_price' => 0, // Changed from '' to 0
                 'stock' => 0, 
+                'bookshop_id' => '',
                 'file' => null
             ];
         }
@@ -160,25 +180,38 @@ class BooksManager extends Component
     public function confirmDelete($bookId)
     {
         $this->deletingBookId = $bookId;
+        // dd($this->deletingBookId);
         $this->confirmingDelete = true;
     }
 
     public function deleteBook()
-    {
-        $this->api->delete("books/{$this->deletingBookId}");
+        {
+            $response = $this->api->delete("books/{$this->deletingBookId}");
 
-        $this->confirmingDelete = false;
-        $this->deletingBookId = null;
+            // 1. Close the modal immediately for better UX
+            $this->confirmingDelete = false;
 
-        $this->loadBooks();
-        session()->flash('success', 'Book deleted successfully.');
-    }
+            // 2. Check for errors
+            if (isset($response['errors']) || (isset($response['message']) && $response['message'] !== 'Book deleted successfully')) {
+                $msg = $response['message'] ?? 'An error occurred';
+                session()->flash('error', $msg);
+                $this->dispatch('notify', ['type' => 'error', 'message' => $msg]); 
+                return;
+            }
 
-    // public function loadBooks()
-    // {
-    //     $this->books = $this->api->get('books?limit=12') ?? [];
-    //     //dd($this->books);
-    // }
+            // 3. Clear State
+            $this->deletingBookId = null;
+
+            // 4. Refresh the data
+            $this->loadBooks();
+            
+            // 5. Success Flash
+            session()->flash('success', 'Book deleted successfully.');
+            
+            // 6. Optional: Trigger a browser event for a toast notification
+            $this->dispatch('notify', ['type' => 'success', 'message' => 'Book deleted successfully.']);
+        }
+
 
     public function loadBooks()
         {
@@ -271,9 +304,20 @@ class BooksManager extends Component
                 'title' => 'required|string|max:255',
                 'author_name' => 'required|string|max:255',
                 'category_id' => 'required',
-                'variants' => 'required|array|min:1',
-                'variants.*.price' => 'required|numeric|min:0',
                 'cover_image' => $this->editingBookId ? 'nullable|image|max:2048' : 'required|image|max:2048',
+                
+                // Variant Specific Validation
+                'variants' => 'required|array|min:1',
+                'variants.*.type' => 'required|string',
+                'variants.*.price' => 'required|numeric|min:0',
+                'variants.*.stock' => 'required_if:variants.*.type,physical',
+                'variants.*.bookshop_id' => 'required_if:variants.*.type,physical',
+                'variants.*.file' => 'required_if:variants.*.type,digital|max:10240',
+            ], [
+                'variants.*.type.required' => 'Please select a format type.',
+                'variants.*.price.required' => 'Price is required.',
+                'variants.*.file.required_if' => 'Please upload the e-book file.',
+                'variants.*.bookshop_id.required_if' => 'Please select a bookshop location.',
             ]);
 
             // Check for duplicate types locally before calling API
@@ -308,6 +352,9 @@ class BooksManager extends Component
                 if (isset($variant['id'])) {
                     $formData[] = ['name' => "variants[$index][id]", 'contents' => $variant['id']];
                 }
+                  if ($variant['type'] === 'physical' && !empty($variant['bookshop_id'])) {
+                            $formData[] = ['name' => "variants[$index][bookshop_id]", 'contents' => $variant['bookshop_id']];
+                        }
 
                 $formData[] = ['name' => "variants[$index][type]",           'contents' => $variant['type']];
                 $formData[] = ['name' => "variants[$index][price]",          'contents' => $variant['price']];
@@ -323,7 +370,7 @@ class BooksManager extends Component
                             'name'     => "variants[$index][file]", 
                             'contents' => fopen($variant['file']->getRealPath(), 'r'),
                             'filename' => $variant['file']->getClientOriginalName(),
-                            // ADD THIS: explicitly set the header for this part
+                           
                             'headers'  => [
                                 'Content-Type' => $mimeType
                             ]
@@ -335,7 +382,7 @@ class BooksManager extends Component
             $response = $this->editingBookId
                 ? $this->api->putWithFile("books/{$this->editingBookId}", $formData)
                 : $this->api->postWithFile('books', $formData);
-           // dd($response);
+           dd($response);
             // 6. Handle Errors from API
             if (isset($response['errors'])) {
                 foreach ($response['errors'] as $field => $messages) {
