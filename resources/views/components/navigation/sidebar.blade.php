@@ -25,6 +25,11 @@
             icon="cog" 
             label="Settings"
         />
+        <x-navigation.sidebar-link
+            href="{{ route('order.management') }}"
+            icon="cog" 
+            label="Order Management"
+        />
 
         <x-navigation.sidebar-link
             href="#"

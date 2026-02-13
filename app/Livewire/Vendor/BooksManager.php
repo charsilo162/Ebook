@@ -385,19 +385,24 @@ class BooksManager extends Component
            dd($response);
             // 6. Handle Errors from API
             if (isset($response['errors'])) {
+                 
                 foreach ($response['errors'] as $field => $messages) {
                     $this->addError($field, $messages[0]);
                 }
-                
+               
                 // Auto-navigate to the step with the error
-                if ($this->hasError('title') || $this->hasError('author_name')) {
-                    $this->step = 1;
-                } else {
-                    $this->step = 2;
-                }
-                return;
-            }
+              $errors = $this->getErrorBag();
 
+                    if ($errors->has('title') || $errors->has('author_name') || $errors->has('category_id')) {
+                        $this->step = 1;
+                    } else {
+                        // If errors are in variants or other fields, go to step 2
+                        $this->step = 2;
+                    }
+
+                    return;
+                }
+           
             // 7. Success
             $this->showModal = false;
             $this->resetForm();

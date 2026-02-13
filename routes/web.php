@@ -46,9 +46,9 @@ Route::middleware('sessionauth')->group(function () {
     Route::get('/my-library', [MyLibraryController::class, 'show'])->name('library.index');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     // User Library Page (The one you are building now)
-    // Route::get('/my-library', function () {
-    //     return view('user.my-library'); // This view will hold your Livewire component
-    // })->name('');
+    Route::get('/order-management', function () {
+        return view('pages.order-management'); // This view will hold your Livewire component
+    })->name('order.management');
 
     // Order Success / Details Page
     // Route::get('/orders/{id}', function ($id) {

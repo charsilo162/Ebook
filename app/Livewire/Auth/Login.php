@@ -32,7 +32,7 @@ class Login extends Component
             'email' => $this->email,
             'password' => $this->password,
         ]);
-
+           // dd($response);
         // 3. Handle Errors (Invalid Credentials / Validation)
         if (isset($response['message']) && $response['message'] === 'Invalid credentials') {
             $this->addError('email', 'These credentials do not match our records.');

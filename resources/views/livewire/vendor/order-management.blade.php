@@ -75,4 +75,33 @@
      <div class="mt-6">
         {{-- Custom Laravel/Livewire pagination links --}}
     </div>
+
+    {{-- resources/views/livewire/vendor/order-management.blade.php --}}
+
+<div 
+    x-data="{ show: false, message: '', type: 'success' }"
+    x-on:notify.window="
+        show = true; 
+        message = $event.detail[0].message; 
+        type = $event.detail[0].type;
+        setTimeout(() => show = false, 3000)
+    "
+    x-show="show"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 transform translate-y-2"
+    x-transition:enter-end="opacity-100 transform translate-y-0"
+    x-transition:leave="transition ease-in duration-300"
+    x-transition:leave-start="opacity-100 transform translate-y-0"
+    x-transition:leave-end="opacity-0 transform translate-y-2"
+    class="fixed bottom-5 right-5 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-bold"
+    :class="type === 'success' ? 'bg-green-600' : 'bg-red-600'"
+    style="display: none;"
+>
+    <div class="flex items-center gap-2">
+        <template x-if="type === 'success'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        </template>
+        <span x-text="message"></span>
+    </div>
+</div>
 </div>

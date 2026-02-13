@@ -9,7 +9,7 @@ class OrderManagement extends Component
 {
     use WithPagination;
 
-    public $filterStatus = ''; // Filter by status (pending, shipped, etc.)
+    public $filterStatus = ''; 
 
     public function updateStatus($orderId, $newStatus, ApiService $api)
     {
@@ -18,33 +18,40 @@ class OrderManagement extends Component
         ]);
 
         if (isset($response['message'])) {
-            session()->flash('success', $response['message']);
+            // 1. Dispatch browser event for the Toast
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => $response['message']
+            ]);
+        } else {
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => $response['error'] ?? 'Something went wrong'
+            ]);
         }
     }
 
-  public function render(ApiService $api)
-        {
-            // 1. Fetch the orders
-            $response = $api->get("vendor/orders", [
-                'status' => $this->filterStatus,
-                'page' => $this->paginators['page'] ?? 1
-            ]);
+    public function render(ApiService $api)
+    {
+        $response = $api->get("vendor/orders", [
+            'status' => $this->filterStatus,
+            'page' => $this->paginators['page'] ?? 1
+        ]);
 
-            $orders = $response['data'] ?? [];
-
-            // 2. Prepare Stats Data
-            // In a real app, you might get these from a specific /vendor/stats API endpoint
-            $stats = [
-                'total_earnings' => collect($orders)->sum('total_amount'),
-                'pending_count'  => collect($orders)->where('status', 'pending')->count(),
-                'shipped_count'  => collect($orders)->where('status', 'shipped')->count(),
-            ];
-
-            return view('livewire.vendor.order-management', [
-                'orders' => $orders,
-                'meta' => $response['meta'] ?? [],
-                'stats' => $stats
-            ]);
-        }
+        $orders = $response['data'] ?? [];
         
+        // Use the stats directly from the API response (if you implemented the backend fix)
+        // Otherwise, calculate from current page
+        $stats = $response['stats'] ?? [
+            'total_earnings' => collect($orders)->sum('total_amount'),
+            'pending_count'  => collect($orders)->where('status', 'pending')->count(),
+            'shipped_count'  => collect($orders)->where('status', 'shipped')->count(),
+        ];
+
+        return view('livewire.vendor.order-management', [
+            'orders' => $orders,
+            'meta'   => $response['meta'] ?? [],
+            'stats'  => $stats
+        ]); 
+    }
 }
