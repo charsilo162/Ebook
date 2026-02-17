@@ -77,19 +77,17 @@ class BooksManager extends Component
                 });
             }
 
-     public function updatedCategorySearch($value)
-            {
-                if (strlen($value) < 2) {
-                    $this->categories = []; // Don't search for just 1 letter
-                    return;
-                }
-
-                // Call your API with a search query
-                // Endpoint likely looks like: /api/categories?search=fiction
-                $response = $this->api->get("categories?search={$value}");
-                
-                $this->categories = $response['data'] ?? $response ?? [];
+    public function updatedCategorySearch($value)
+        {
+            if (strlen($value) < 2) {
+                // Instead of clearing, reload the default list
+                $this->loadCategories(); 
+                return;
             }
+
+            $response = $this->api->get("categories?search={$value}");
+            $this->categories = $response['data'] ?? $response ?? [];
+        }
         public function nextStep()
             {
                 if ($this->step == 1) {
@@ -161,22 +159,7 @@ class BooksManager extends Component
                 'file' => null
             ];
         }
-                // public function addVariant()
-                //     {
-                //         // Prevent adding more than 2 variants
-                //         if (count($this->variants) >= 2) {
-                //             $this->addError('variants', 'A book can only have one Physical and one Digital format.');
-                //             return;
-                //         }
-
-                //         $this->variants[] = [
-                //             'type' => count($this->variants) === 0 ? 'physical' : ($this->variants[0]['type'] === 'physical' ? 'digital' : 'physical'), 
-                //             'price' => '', 
-                //             'discount_price' => '', 
-                //             'stock' => 0, 
-                //             'file' => null
-                //         ];
-                //     }
+               
     public function confirmDelete($bookId)
     {
         $this->deletingBookId = $bookId;
@@ -242,41 +225,61 @@ class BooksManager extends Component
                     } else {
                         $this->addVariant(); // Add one default row for new books
                     }
-
+ 
                     $this->showModal = true;
                 }
 
     protected function fillForm($bookId)
         {
+            // Find the book in the local collection
             $book = collect($this->books)->firstWhere('id', $bookId);
-                if (!$book){
-                    logger("Book not found for ID: " . $bookId);
-                    return;
-                } 
+            
+            if (!$book) {
+                logger("Book not found for ID: " . $bookId);
+                return;
+            }
 
-                // 1. Set the ID
-                $this->category_id = isset($book->category_id) ? (string)$book->category_id : (string)($book->category->id ?? '');
+            // 1. Ensure the full category list is loaded so the user can reselect
+            if (empty($this->categories)) {
+                $this->loadCategories();
+            }
 
-                // 2. IMPORTANT: If we are editing, we must manually add the current 
-                // category to the list so the dropdown can show its name
-                if (isset($book->category)) {
-                    $this->categories = [$book->category]; 
+            // 2. Set the ID (cast to string for HTML select compatibility)
+            $this->category_id = (string)($book->category_id ?? $book->category->id ?? $book->category['id'] ?? '');
+
+            // 3. Prevent the "only one category" bug: 
+            // Check if the book's current category exists in the loaded list. 
+            // If it doesn't (e.g., if it's an old category), add it to the array.
+            if (isset($book->category)) {
+                $currentCatId = $book->category->id ?? $book->category['id'] ?? null;
+                $exists = collect($this->categories)->contains(function ($cat) use ($currentCatId) {
+                    return ($cat->id ?? $cat['id']) == $currentCatId;
+                });
+
+                if (!$exists) {
+                    // We use array_merge or push to keep existing categories 
+                    // instead of overwriting the whole list
+                    $this->categories[] = $book->category;
                 }
+            }
 
+            // 4. Fill basic text fields
             $this->title       = $book->title ?? '';
             $this->author_name = $book->author_name ?? $book->author ?? '';
-            // $this->category_id = $book->category_id ?? $book->category->id ?? null;
             $this->description = $book->description ?? '';
 
-            // Map existing formats/variants from API → form structure
-            $this->variants = collect($book->formats ?? [])
+            // 5. Map variants/formats
+            $this->variants = collect($book->formats ?? $book->variants ?? [])
                 ->map(function ($v) {
+                    // Standardize to array format for Livewire form tracking
                     return [
                         'id'             => $v->id ?? $v['id'] ?? null,
                         'type'           => $v->type ?? $v['type'] ?? 'physical',
                         'price'          => $v->price ?? $v['price'] ?? 0,
                         'discount_price' => $v->discount_price ?? $v['discount_price'] ?? 0,
-                        'stock'          => $v->stock_count ?? $v['stock_quantity'] ?? 0,
+                        'stock'          => $v->stock_count ?? $v['stock_quantity'] ?? $v['stock'] ?? 0,
+                        'bookshop_id'    => $v->bookshop_id ?? $v['bookshop_id'] ?? '',
+                        'file'           => null // Reset file input on edit unless you handle URL display
                     ];
                 })
                 ->toArray();
@@ -382,7 +385,7 @@ class BooksManager extends Component
             $response = $this->editingBookId
                 ? $this->api->putWithFile("books/{$this->editingBookId}", $formData)
                 : $this->api->postWithFile('books', $formData);
-           dd($response);
+                // dd($response);
             // 6. Handle Errors from API
             if (isset($response['errors'])) {
                  

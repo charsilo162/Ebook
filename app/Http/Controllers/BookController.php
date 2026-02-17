@@ -33,7 +33,7 @@ class BookController extends Controller
             $book = $response['data'];
 
             $type = $request->query('type', $book['default_type'] ?? 'physical');
-                // dd( $book);
+              // dd( $book);
             $data = [
                 'id' => $uuid,
                 'authorName' => $book['author'] ?? $book['author_name'],

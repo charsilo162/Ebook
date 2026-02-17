@@ -115,7 +115,7 @@
                         placeholder="Type to filter..." 
                         class="w-full rounded-lg border-none bg-zinc-50 pl-8 py-1.5 text-xs focus:ring-0"
                     >
-                </div>
+                </div> 
 
                 {{-- The actual Select - border removed to blend in --}}
                 <select

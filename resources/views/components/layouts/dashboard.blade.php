@@ -12,7 +12,7 @@
 <body
     x-data="{ sidebarOpen: false }"
     class="bg-zinc-50 text-zinc-900"
->
+    >
 
     {{-- Top bar (mobile + desktop) --}}
     <x-navigation.navbar

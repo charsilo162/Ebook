@@ -1,6 +1,6 @@
 <x-layouts.app>
     {{-- Physical Hero (Specialized for Hardcopy) --}}
-    @livewire('book-physical-hero', ['id' => $id])
+    @livewire('books.book-physical-hero', ['id' => $id])
 
     {{-- Unique Physical Sections: e.g., Shipping Calculator or Warehouse Info --}}
     <section class="max-w-7xl mx-auto px-6 py-4">
@@ -11,5 +11,5 @@
     </section>
 
     {{-- Shared Author Section --}}
-    @livewire('author-books-grid', ['authorName' => $authorName, 'currentBookId' => $id])
+    @livewire('books.author-books-grid', ['authorName' => $authorName, 'currentBookId' => $id])
 </x-layouts.app>

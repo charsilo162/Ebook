@@ -50,6 +50,7 @@ class Login extends Component
         if (isset($response['token'])) {
             Session::put('api_token', $response['token']);
             Session::put('user', $response['user']);
+            Session::save();
 
             // 5. Redirect based on role (Vendor vs Reader)
             // Note: Adjust 'vendor_profile' check based on your UserResource structure

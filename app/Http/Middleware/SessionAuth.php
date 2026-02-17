@@ -9,7 +9,9 @@ class SessionAuth
 {
     public function handle($request, Closure $next)
     {
+        //dd(Session::all());
         if (!Session::has('user') || !Session::has('api_token')) {
+       
             return redirect()->route('login');
         }
 

@@ -1,4 +1,5 @@
-<x-layouts.app>
+ <x-layouts.dashboard title="MY Order">
  
-<livewire:user.order-details />
-</x-layouts.app>
+<livewire:user.order-history />
+{{-- <livewire:user.my-library /> --}}
+ </x-layouts.dashboard>

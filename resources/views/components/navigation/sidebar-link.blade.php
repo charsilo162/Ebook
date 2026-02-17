@@ -1,11 +1,9 @@
-@props(['href', 'icon', 'label'])
-
 <a
     href="{{ $href }}"
-    class="flex items-center gap-3 px-3 py-2 rounded-lg
-           text-purple-100 hover:bg-purple-500/40
-           transition"
+    class="flex items-center gap-4 px-4 py-3 rounded-xl
+           text-purple-100 hover:bg-white/10 hover:text-white
+           transition-all duration-300 font-medium shadow-sm"
 >
     <x-heroicon-o-{{ $icon }} class="w-5 h-5" />
-    <span>{{ $label }}</span>
+    <span class="truncate">{{ $label }}</span>
 </a>

@@ -4,7 +4,7 @@ namespace App\Livewire\Books;
 use Livewire\Component;
 use App\Services\ApiService;
 
-class BookDetailHero extends Component
+class BookPhysicalHero extends Component
 
     {
         public $bookId;
@@ -63,6 +63,7 @@ class BookDetailHero extends Component
 
             public function render()
             {
-            return view('livewire.books.book-detail-hero');
+                //dd($this->book);
+            return view('livewire.books.book-physical-hero');
             }
     }

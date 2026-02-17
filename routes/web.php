@@ -51,7 +51,7 @@ Route::middleware('sessionauth')->group(function () {
     })->name('order.management');
 
     // Order Success / Details Page
-    // Route::get('/orders/{id}', function ($id) {
-    //     return view('user.order-details', ['orderId' => $id]);
-    // })->name('orders.show');
+    Route::get('/dashboard/my-orders', function () {
+        return view('users.my-order');
+    })->name('my.orders');
 });
