@@ -1,5 +1,8 @@
 <div>
     @if(!empty($categories))
+     {{-- @php
+            dd($categories);
+        @endphp --}}
         <x-sections.category-grid :categories="$categories" />
     @else
         {{-- Skeleton loading for categories --}}

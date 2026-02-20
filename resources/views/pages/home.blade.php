@@ -1,31 +1,9 @@
 <x-layouts.app>
 <x-hero.hero-section>
-    @php
-        $tags = [
-            ['1000 Fiction', 'pink'],
-            ['1000 Sci-Fi', 'blue'],
-            ['1000 Academic', 'green'],
-            ['1000 Horror', 'zinc'],
-        ];
-    @endphp
-
-    @foreach ($tags as $index => [$label, $color])
-        <div
-            x-show="show"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 translate-y-4"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            style="transition-delay: {{ $index * 120 }}ms"
-        >
-            <x-ui.pill-button
-                :label="$label"
-                :color="$color"
-            />
-        </div>
-    @endforeach
+<livewire:hero-category-tags />
 </x-hero.hero-section>
 
-<x-sections.category-grid
+{{-- <x-sections.category-grid
     :categories="[
         ['title' => 'fiction', 'count' => 1000, 'image' => 'storage/images/c1.jpg'],
         ['title' => 'sci-fi', 'count' => 1000, 'image' => 'storage/images/c2.jpg'],
@@ -36,7 +14,7 @@
         ['title' => 'inspirational', 'count' => 1000, 'image' => 'storage/images/c7.jpg'],
         ['title' => 'spiritual', 'count' => 1000, 'image' => 'storage/images/c8.jpg'],
     ]"
-/>
+/> --}}
 {{-- <x-sections.book-showcase
     :sections="[
         [

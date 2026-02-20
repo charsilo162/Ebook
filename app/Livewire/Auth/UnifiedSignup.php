@@ -104,7 +104,7 @@ class UnifiedSignup extends Component
                 return redirect()->route('vendor.dashboard');
             }
             
-            return redirect()->route('user.library');
+            return redirect()->route('library.index');
         }
     }
 

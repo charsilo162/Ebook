@@ -52,21 +52,13 @@ public function getActiveCategoryNameProperty()
 
 public function render(ApiService $api)
 {
-    // Ensure we are passing exactly what the API index method expects
-   // dd($this->search, $this->activeCategory);
- 
-    //   dd([
-    //     'search' => $this->search,
-    //     'category' => $this->activeCategory,
-    //     'page' => $this->paginators['page'] ?? 1,
-    // ]);
     $response = $api->getFilteredBooks([
         'search' => $this->search,
         'category_id' => $this->activeCategory,
         'page' => $this->paginators['page'] ?? 1,
         'per_page' => 15,
     ]);
-
+// dd($response['data']);
     return view('livewire.books.book-explorer', [
         'books' => $response['data'] ?? [],
         'meta'  => $response['meta'] ?? [],

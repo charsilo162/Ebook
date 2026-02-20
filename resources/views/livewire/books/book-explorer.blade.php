@@ -74,6 +74,8 @@
                 :title="$book['title']"
                 :price="$book['starting_price']"
                 :image="$book['cover_image']"
+                :type="$book['default_type']"
+                :author="$book['author']"
                 :href="route('books.show', ['uuid' => $book['id'], 'type' => $book['default_type']])"
                 :outOfStock="($book['stock'] ?? 1) <= 0"
             />

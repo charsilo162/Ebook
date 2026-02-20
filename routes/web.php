@@ -8,6 +8,8 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MyLibraryController;
 use App\Http\Controllers\OrderController;
+use App\Livewire\User\UserSettings;
+use Illuminate\Support\Facades\Session;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -43,6 +45,7 @@ Route::get('/books/{uuid}', [BookController::class, 'show'])->name('books.show')
 
 
 Route::middleware('sessionauth')->group(function () {
+    Route::get('/user-settings', UserSettings::class)->name('user.settings');
     Route::get('/my-library', [MyLibraryController::class, 'show'])->name('library.index');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     // User Library Page (The one you are building now)
@@ -54,4 +57,12 @@ Route::middleware('sessionauth')->group(function () {
     Route::get('/dashboard/my-orders', function () {
         return view('users.my-order');
     })->name('my.orders');
+    Route::get('/admin/manage-books', function () {
+        return view('pages.admin-manger');
+    })->name('admin.books');
 });
+Route::post('/logout', function () {
+                Session::forget('user');
+                Session::forget('api_token');
+                return redirect()->route('login');
+            })->name('logout');
