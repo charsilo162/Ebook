@@ -5,7 +5,7 @@
         'title' => 'Gift A Book',
         'price' => 3500,
         'image' => 'storage/images/c2.jpg',
-    ],
+    ], 
     [
         'title' => 'Lovable A Book',
         'price' => 3500,

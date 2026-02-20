@@ -7,6 +7,9 @@
            lg:translate-x-0"
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
 >
+    @php $user = Session::get('user'); 
+  
+    @endphp
     {{-- Logo / Header & Close Button --}}
     <div class="h-20 flex items-center justify-between px-6 border-b border-white/10">
         <a href="{{ route('home') }}" class="text-2xl font-bold tracking-wide">
@@ -25,17 +28,22 @@
     {{-- Navigation Links --}}
     {{-- Note: Added @click="sidebarOpen = false" so it closes when a link is clicked on mobile --}}
     <nav class="flex-1 px-4 mt-8 space-y-2" @click="if(window.innerWidth < 1024) sidebarOpen = false">
+      @if ($user['type'] === 'vendor' || $user['type'] === 'admin')
         <x-navigation.sidebar-link href="/dashboard" icon="home" label="Dashboard" />
-        <x-navigation.sidebar-link href="{{ route('library.index') }}" icon="book-open" label="User Library" />
         <x-navigation.sidebar-link href="/vendor/settings" icon="cog-6-tooth" label="Settings" />
-        <x-navigation.sidebar-link href="{{ route('user.settings') }}" icon="user" label="Profile" />
-        <x-navigation.sidebar-link href="{{ route('order.management') }}" icon="shopping-cart" label="Order Management" />
-        <x-navigation.sidebar-link href="{{ route('my.orders') }}" icon="shopping-cart" label="My Orders" />
         <x-navigation.sidebar-link href="{{ route('admin.books') }}" icon="book-open" label="Manage Books" />
-    </nav>
-
+        <x-navigation.sidebar-link href="{{ route('order.management') }}" icon="shopping-cart" label="Order Management" />
+       @endif
+        @if ($user['type'] === 'user' || $user['type'] === 'vendor')
+            {{-- <x-navigation.sidebar-link href="{{ route('admin.users') }}" icon="users" label="Manage Users" /> --}}
+        <x-navigation.sidebar-link href="{{ route('user.settings') }}" icon="user" label="Profile" />
+        <x-navigation.sidebar-link href="{{ route('my.orders') }}" icon="shopping-cart" label="My Orders" />
+        <x-navigation.sidebar-link href="{{ route('library.index') }}" icon="book-open" label="User Library" />
+    
+@endif
+</nav>
     {{-- Logout --}}
-    @php $user = Session::get('user'); @endphp
+   
     @if($user)
         <div class="px-4 pb-6">
             <form method="POST" action="{{ route('logout') }}">
