@@ -1,4 +1,5 @@
 <div>
+
 <section>
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-bold">Your Uploads</h2>
@@ -34,7 +35,7 @@
         @endphp --}}
     @forelse ($books as $book)
             <x-book.book-card
-                :book="$book"
+                :book="$book" 
                 :showActions="true"
                 {{-- ADD SINGLE QUOTES AROUND THE ID BELOW --}}
                 onEdit="openModal('{{ $book->id }}')"
@@ -99,45 +100,45 @@
                         wire:model.defer="author_name" />
 
                    <div class="space-y-1">
-            <label class="block text-xs font-bold uppercase tracking-wide text-zinc-600">
-                Category
-            </label>
-    
-            <div class="rounded-xl border border-zinc-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-purple-200 focus-within:border-purple-500 transition">
-                {{-- Search Input - styled to look like a header --}}
-                <div class="relative mb-2">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </div>
-                    <input 
-                        type="text" 
-                        wire:model.live="categorySearch" 
-                        placeholder="Type to filter..." 
-                        class="w-full rounded-lg border-none bg-zinc-50 pl-8 py-1.5 text-xs focus:ring-0"
-                    >
-                </div> 
+                        <label class="block text-xs font-bold uppercase tracking-wide text-zinc-600">
+                            Category
+                        </label>
+                
+                        <div class="rounded-xl border border-zinc-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-purple-200 focus-within:border-purple-500 transition">
+                            {{-- Search Input - styled to look like a header --}}
+                            <div class="relative mb-2">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    wire:model.live="categorySearch" 
+                                    placeholder="Type to filter..." 
+                                    class="w-full rounded-lg border-none bg-zinc-50 pl-8 py-1.5 text-xs focus:ring-0"
+                                >
+                            </div> 
 
-                {{-- The actual Select - border removed to blend in --}}
-                <select
-                    wire:model.defer="category_id"
-                    class="w-full border-none p-0 text-sm focus:ring-0 cursor-pointer bg-transparent"
-                    size="5" {{-- Makes it look more like a dropdown list --}}
-                >
-                    <option value="" class="py-1">Select a Category</option>
-                    @forelse($this->filteredCategories as $category)
-                        @php 
-                            $catId = is_array($category) ? $category['id'] : $category->id;
-                            $catName = is_array($category) ? $category['name'] : $category->name;
-                        @endphp
-                        <option value="{{ $catId }}" class="py-1 px-2 hover:bg-purple-50 rounded">
-                            {{ $catName }}
-                        </option>
-                    @empty
-                        <option disabled>No categories found...</option>
-                    @endforelse
-                </select>
-            </div>
-            @error('category_id') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+                            {{-- The actual Select - border removed to blend in --}}
+                            <select
+                                wire:model.defer="category_id"
+                                class="w-full border-none p-0 text-sm focus:ring-0 cursor-pointer bg-transparent"
+                                size="5" {{-- Makes it look more like a dropdown list --}}
+                            >
+                                <option value="" class="py-1">Select a Category</option>
+                                @forelse($this->filteredCategories as $category)
+                                    @php 
+                                        $catId = is_array($category) ? $category['id'] : $category->id;
+                                        $catName = is_array($category) ? $category['name'] : $category->name;
+                                    @endphp
+                                    <option value="{{ $catId }}" class="py-1 px-2 hover:bg-purple-50 rounded">
+                                        {{ $catName }}
+                                    </option>
+                                @empty
+                                    <option disabled>No categories found...</option>
+                                @endforelse
+                            </select>
+                        </div>
+                    @error('category_id') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
         </div>
 
                     <x-form.textarea

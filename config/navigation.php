@@ -5,10 +5,10 @@ return [
         'label' => 'Home',
         'route' => 'home',
     ],
-    [
-        'label' => 'Book List',
-        'route' => 'book-list',
-    ],
+    // [
+    //     'label' => 'Book List',
+    //     'route' => 'book-list',
+    // ],
    
     [
         'label' => 'Contact us',

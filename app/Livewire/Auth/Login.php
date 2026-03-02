@@ -53,12 +53,13 @@ class Login extends Component
             Session::save();
 
             // 5. Redirect based on role (Vendor vs Reader)
-            // Note: Adjust 'vendor_profile' check based on your UserResource structure
-            if (!empty($response['user']['vendor_profile'])) {
-                return redirect()->route('vendor.dashboard');
-            }
+            $userType = $response['user']['type'] ?? null;
+                    if ($userType === 'vendor') { 
+                        return redirect()->route('dashboard');
+                    }
 
-            return redirect()->route('library.index');
+                    //dd($response['user']['type'] ?? null);
+                    return redirect()->route('library.index');
         }
     }
 

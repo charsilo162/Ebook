@@ -100,10 +100,12 @@ class UnifiedSignup extends Component
             Session::put('user', $response['user']);
 
             // Redirect based on whether they have a vendor profile
-            if (isset($response['user']['vendor_profile'])) {
-                return redirect()->route('vendor.dashboard');
+           $userType = $response['user']['type'] ?? null;
+
+            if ($userType === 'vendor') {
+                return redirect()->route('dashboard');
             }
-            
+
             return redirect()->route('library.index');
         }
     }

@@ -30,6 +30,8 @@
     <nav class="flex-1 px-4 mt-8 space-y-2" @click="if(window.innerWidth < 1024) sidebarOpen = false">
       @if ($user['type'] === 'vendor' || $user['type'] === 'admin')
         <x-navigation.sidebar-link href="/dashboard" icon="home" label="Dashboard" />
+        <x-navigation.sidebar-link href="{{ route('admin.category') }}" icon="tag" label="Manage Categories" />
+        <x-navigation.sidebar-link href="{{ route('admin.user') }}" icon="users" label="Manage Users" />
         <x-navigation.sidebar-link href="/vendor/settings" icon="cog-6-tooth" label="Settings" />
         <x-navigation.sidebar-link href="{{ route('admin.books') }}" icon="book-open" label="Manage Books" />
         <x-navigation.sidebar-link href="{{ route('order.management') }}" icon="shopping-cart" label="Order Management" />

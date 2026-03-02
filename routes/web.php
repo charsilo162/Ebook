@@ -74,3 +74,9 @@ Route::middleware('sessionauth')->group(function () {
     Route::get('/admin/manage-books', function () {
         return view('pages.admin-manger');
     })->name('admin.books');
+    Route::get('/admin/manage-user', function () {
+        return view('pages.manage-user');
+    })->name('admin.user');
+    Route::get('/admin/manage-category', function () {
+        return view('pages.manage-category');
+    })->name('admin.category');

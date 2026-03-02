@@ -63,7 +63,7 @@ class BooksManager extends Component
             {
                 // 1. Convert to collection if it isn't one
                 $collection = collect($this->categories);
-
+               
                 if (empty($this->categorySearch)) {
                     return $collection;
                 }
@@ -99,19 +99,31 @@ class BooksManager extends Component
                 }
 
                 if ($this->step == 2) {
+                    // 1. First, validate the basics
                     $this->validate([
                         'variants' => 'required|array|min:1',
                         'variants.*.type' => 'required',
                         'variants.*.price' => 'required|numeric|min:0',
                         'variants.*.stock' => 'required_if:variants.*.type,physical',
                         'variants.*.bookshop_id' => 'required_if:variants.*.type,physical',
-                        'variants.*.file' => 'required_if:variants.*.type,digital',
                     ]);
+
+                    // 2. Now, manually check the digital files for NEW variants only
+                    foreach ($this->variants as $index => $variant) {
+                        if ($variant['type'] === 'digital') {
+                            $isNewVariant = empty($variant['id']);
+                            $noFileSelected = empty($variant['file']) || is_string($variant['file']);
+
+                            if ($isNewVariant && $noFileSelected) {
+                                $this->addError("variants.$index.file", 'Please upload the e-book file for this new digital variant.');
+                                return; // Stop and stay on step 2
+                            }
+                        }
+                    }
                 }
 
                 $this->step++;
             }
-
         public function prevStep()
         {
             $this->step--;
@@ -201,7 +213,7 @@ class BooksManager extends Component
             $response = $this->api->get('books?limit=12');
             $books = $response['data'] ?? $response ?? [];
             
-
+                // dd($books);
             $this->books = collect($books)
                 ->filter(fn ($book) => is_array($book) && isset($book['id']))
                 ->map(fn ($book) => (object) $book)
@@ -233,7 +245,7 @@ class BooksManager extends Component
         {
             // Find the book in the local collection
             $book = collect($this->books)->firstWhere('id', $bookId);
-            
+                // dd($book);
             if (!$book) {
                 logger("Book not found for ID: " . $bookId);
                 return;
@@ -268,21 +280,35 @@ class BooksManager extends Component
             $this->author_name = $book->author_name ?? $book->author ?? '';
             $this->description = $book->description ?? '';
 
-            // 5. Map variants/formats
-            $this->variants = collect($book->formats ?? $book->variants ?? [])
-                ->map(function ($v) {
-                    // Standardize to array format for Livewire form tracking
-                    return [
-                        'id'             => $v->id ?? $v['id'] ?? null,
-                        'type'           => $v->type ?? $v['type'] ?? 'physical',
-                        'price'          => $v->price ?? $v['price'] ?? 0,
-                        'discount_price' => $v->discount_price ?? $v['discount_price'] ?? 0,
-                        'stock'          => $v->stock_count ?? $v['stock_quantity'] ?? $v['stock'] ?? 0,
-                        'bookshop_id'    => $v->bookshop_id ?? $v['bookshop_id'] ?? '',
-                        'file'           => null // Reset file input on edit unless you handle URL display
-                    ];
-                })
-                ->toArray();
+            // 5. Map variants/formats 
+           $this->variants = collect($book->formats ?? $book->variants ?? [])
+            ->map(function ($v) {
+                // Safety: make sure we work with array (your API returns arrays)
+                $variant = is_object($v) ? (array) $v : $v;
+
+                return [
+                    'id'             => $variant['id']   ?? null,
+                    'type'           => $variant['type'] ?? 'physical',
+
+                    'price'          => (float) ($variant['price'] ?? 0),
+                    'discount_price' => (float) ($variant['discount_price'] ?? 0),
+
+                    // Fixed: prioritize the actual key name from your API response
+                    'stock'          => (int) ($variant['stock_count'] ?? 
+                                            $variant['stock']       ?? 
+                                            $variant['quantity']    ?? 
+                                            0),
+
+                    'bookshop_id'    => $variant['bookshop_id'] ?? 
+                                        $variant['location_id'] ?? 
+                                        $variant['store_id']    ?? 
+                                        '',
+
+                    'file'           => null
+                ];
+            })
+            ->values()   // re-index array (good practice)
+            ->toArray();
         }
 
     protected function resetForm()
@@ -300,46 +326,65 @@ class BooksManager extends Component
         }
 
 
-    public function save()
+// Inside your Livewire Component
+
+public function save()
         {
-            // 1. Local Validation
+            // 1. MANUALLY CHECK DIGITAL FILES FIRST
+            // This solves the "required during add, optional during edit" logic
+            foreach ($this->variants as $index => $variant) {
+                if ($variant['type'] === 'digital') {
+                    $isNewVariant = empty($variant['id']);
+                    $noFileUploaded = empty($variant['file']) || is_string($variant['file']);
+
+                    if ($isNewVariant && $noFileUploaded) {
+                        $this->addError("variants.$index.file", 'Please upload the e-book file.');
+                        $this->step = 2;
+                        return; // Stop here if digital file is missing for a new entry
+                    }
+                }
+            }
+
+            // 2. STANDARD VALIDATION
+            // Notice I removed the Closure from here to keep it simple.
             $this->validate([
                 'title' => 'required|string|max:255',
                 'author_name' => 'required|string|max:255',
                 'category_id' => 'required',
                 'cover_image' => $this->editingBookId ? 'nullable|image|max:2048' : 'required|image|max:2048',
-                
-                // Variant Specific Validation
                 'variants' => 'required|array|min:1',
                 'variants.*.type' => 'required|string',
                 'variants.*.price' => 'required|numeric|min:0',
+                
+                // Physical specific
                 'variants.*.stock' => 'required_if:variants.*.type,physical',
                 'variants.*.bookshop_id' => 'required_if:variants.*.type,physical',
-                'variants.*.file' => 'required_if:variants.*.type,digital|max:10240',
+                
+                // Digital file (Standard rules only, no "required" here)
+                'variants.*.file' => 'nullable|file|max:10240', 
             ], [
                 'variants.*.type.required' => 'Please select a format type.',
                 'variants.*.price.required' => 'Price is required.',
-                'variants.*.file.required_if' => 'Please upload the e-book file.',
                 'variants.*.bookshop_id.required_if' => 'Please select a bookshop location.',
             ]);
 
-            // Check for duplicate types locally before calling API
+            // 3. DUPLICATE CHECK
             $types = collect($this->variants)->pluck('type');
             if ($types->count() !== $types->unique()->count()) {
-                $this->addError('variants', 'You cannot have two variants of the same type (e.g., two physical copies).');
-                $this->step = 2; 
+                $this->addError('variants', 'You cannot have two variants of the same type.');
+                $this->step = 2;
                 return;
             }
 
-            // 2. Build Multipart Data
+            // 4. BUILD MULTIPART DATA
             $formData = [
-                ['name' => 'title',        'contents' => $this->title],
+                ['name' => 'title',       'contents' => $this->title],
                 ['name' => 'author_name',  'contents' => $this->author_name],
                 ['name' => 'category_id',  'contents' => $this->category_id],
-                ['name' => 'description',  'contents' => $this->description],
+                ['name' => 'description',  'contents' => $this->description ?? ''],
             ];
 
-            // 3. Cover Image
+            // Cover Image
             if ($this->cover_image && !is_string($this->cover_image)) {
                 $formData[] = [
                     'name'     => 'cover_image',
@@ -348,68 +393,48 @@ class BooksManager extends Component
                 ];
             }
 
-            // 4. Variants (Crucial Change Here)
+            // 5. PROCESS VARIANTS
             foreach ($this->variants as $index => $variant) {
-                // !!! IMPORTANT: If editing, we MUST send the variant ID so the backend 
-                // knows this isn't a "new" duplicate variant.
-                if (isset($variant['id'])) {
+                if (!empty($variant['id'])) {
                     $formData[] = ['name' => "variants[$index][id]", 'contents' => $variant['id']];
                 }
-                  if ($variant['type'] === 'physical' && !empty($variant['bookshop_id'])) {
-                            $formData[] = ['name' => "variants[$index][bookshop_id]", 'contents' => $variant['bookshop_id']];
-                        }
 
-                $formData[] = ['name' => "variants[$index][type]",           'contents' => $variant['type']];
-                $formData[] = ['name' => "variants[$index][price]",          'contents' => $variant['price']];
-                $formData[] = ['name' => "variants[$index][discount_price]", 'contents' => $variant['discount_price'] ?? ''];
-                $formData[] = ['name' => "variants[$index][stock]",          'contents' => $variant['stock'] ?? 0];
+                $formData[] = ['name' => "variants[$index][type]", 'contents' => $variant['type']];
+                $formData[] = ['name' => "variants[$index][price]", 'contents' => $variant['price']];
+                $formData[] = ['name' => "variants[$index][discount_price]", 'contents' => $variant['discount_price'] ?? 0];
 
-                // E-book file handling
-                    if (isset($variant['file']) && !is_string($variant['file'])) {
-                        // Determine the MIME type
-                        $mimeType = $variant['file']->getMimeType(); // e.g., application/pdf
-
-                        $formData[] = [
-                            'name'     => "variants[$index][file]", 
-                            'contents' => fopen($variant['file']->getRealPath(), 'r'),
-                            'filename' => $variant['file']->getClientOriginalName(),
-                           
-                            'headers'  => [
-                                'Content-Type' => $mimeType
-                            ]
-                        ];
-                    }
+                if ($variant['type'] === 'physical') {
+                    $formData[] = ['name' => "variants[$index][stock]", 'contents' => $variant['stock'] ?? 0];
+                    $formData[] = ['name' => "variants[$index][bookshop_id]", 'contents' => $variant['bookshop_id'] ?? ''];
+                } 
+                
+                // Digital File Upload logic
+                if (isset($variant['file']) && !is_string($variant['file']) && !is_null($variant['file'])) {
+                    $formData[] = [
+                        'name'     => "variants[$index][file]",
+                        'contents' => fopen($variant['file']->getRealPath(), 'r'),
+                        'filename' => $variant['file']->getClientOriginalName(),
+                        'headers'  => ['Content-Type' => $variant['file']->getMimeType()]
+                    ];
+                }
             }
-           
-            // 5. API Call
+
+            // 6. API CALL
             $response = $this->editingBookId
                 ? $this->api->putWithFile("books/{$this->editingBookId}", $formData)
                 : $this->api->postWithFile('books', $formData);
-                // dd($response);
-            // 6. Handle Errors from API
+            dd($response);
+            // 7. HANDLE ERRORS
             if (isset($response['errors'])) {
-                 
                 foreach ($response['errors'] as $field => $messages) {
                     $this->addError($field, $messages[0]);
                 }
-               
-                // Auto-navigate to the step with the error
-              $errors = $this->getErrorBag();
+                $this->step = (collect(['title', 'author_name', 'category_id'])->some(fn($f) => $this->getErrorBag()->has($f))) ? 1 : 2;
+                return;
+            }
 
-                    if ($errors->has('title') || $errors->has('author_name') || $errors->has('category_id')) {
-                        $this->step = 1;
-                    } else {
-                        // If errors are in variants or other fields, go to step 2
-                        $this->step = 2;
-                    }
-
-                    return;
-                }
-           
-            // 7. Success
             $this->showModal = false;
             $this->resetForm();
-            $this->step = 1; 
             $this->loadBooks();
             session()->flash('success', 'Book saved successfully!');
         }
