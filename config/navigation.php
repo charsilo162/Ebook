@@ -14,13 +14,13 @@ return [
         'label' => 'Contact us',
         'route' => 'contact',
     ],
-    [
-        'label' => 'Dashboard',
-        'route' => 'dashboard',
-    ],
+    // [
+    //     'label' => 'Dashboard',
+    //     'route' => 'dashboard',
+    // ],
     
     [
-        'label' => 'Categoies',
+        'label' => 'Categories',
         'route' => 'category.books',
     ],
 ];

@@ -21,7 +21,7 @@
 
             <form wire:submit.prevent="signup" class="space-y-6">
                 
-                <div class="flex flex-col items-center mb-8">
+                {{-- <div class="flex flex-col items-center mb-8">
                     <div class="relative group">
                         <div class="w-24 h-24 rounded-full bg-purple-50 border-2 border-dashed border-purple-200 flex items-center justify-center overflow-hidden transition-all group-hover:border-purple-400">
                             @if ($photo)
@@ -36,7 +36,7 @@
                         </label>
                     </div>
                     @error('photo') <span class="text-red-500 text-xs mt-2">{{ $message }}</span> @enderror
-                </div>
+                </div> --}}
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="space-y-1">

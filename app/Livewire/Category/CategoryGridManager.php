@@ -11,7 +11,7 @@ class CategoryGridManager extends Component
     public function render(ApiService $api)
     {
         $response = $api->get('public/categories');
-        //dd($response);
+       // dd($response);
         $this->categories = $response['categories'] ?? [];
 
         return view('livewire.category.category-grid-manager');

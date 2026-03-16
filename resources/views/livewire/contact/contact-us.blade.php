@@ -39,9 +39,9 @@
             placeholder="Tell us how we can help you..."
             wire:model="message"
         />
-        @error('message')
+        {{-- @error('message')
             <span class="text-red-500 text-sm">{{ $message }}</span>
-        @enderror
+        @enderror --}}
 
        <button
     type="submit"

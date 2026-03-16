@@ -210,10 +210,10 @@ class BooksManager extends Component
 
     public function loadBooks()
         {
-            $response = $this->api->get('books?limit=12');
+            $response = $this->api->get('vendor/books?limit=12');
             $books = $response['data'] ?? $response ?? [];
             
-                // dd($books);
+                //  dd($books);
             $this->books = collect($books)
                 ->filter(fn ($book) => is_array($book) && isset($book['id']))
                 ->map(fn ($book) => (object) $book)
@@ -423,7 +423,7 @@ public function save()
             $response = $this->editingBookId
                 ? $this->api->putWithFile("books/{$this->editingBookId}", $formData)
                 : $this->api->postWithFile('books', $formData);
-            dd($response);
+            //dd($response);
             // 7. HANDLE ERRORS
             if (isset($response['errors'])) {
                 foreach ($response['errors'] as $field => $messages) {

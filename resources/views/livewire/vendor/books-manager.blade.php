@@ -9,7 +9,7 @@
             class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
         >
             Upload a book
-        </button>
+        </button> 
     </div>
 
 
@@ -271,19 +271,32 @@
                     {{-- COVER IMAGE --}}
                     <div class="border-2 border-dashed border-purple-200 rounded-3xl p-6 bg-purple-50/30 text-center">
 
-                        <x-form.file
-                            label="Book Cover Image"
-                            name="cover_image"
-                            wire:model="cover_image"
-                            class="mx-auto" />
+             <x-form.file
+                        label="Book Cover Image"
+                        name="cover_image"
+                        wire:model="cover_image"
+                        class="mx-auto" />
+{{-- 
+                    @error('cover_image')
+                        <p class="text-blue text-sm mt-2">{{ $message }}</p>
+                    @enderror --}}
 
-                        @if($cover_image)
-                            <div class="mt-4 flex justify-center">
+                    @if ($cover_image)
+                        <div class="mt-4 flex justify-center">
+
+                            {{-- Only preview images --}}
+                            @if (str_starts_with($cover_image->getMimeType(), 'image/'))
                                 <img
                                     src="{{ $cover_image->temporaryUrl() }}"
                                     class="h-32 rounded-lg shadow-lg border-2 border-white">
-                            </div>
-                        @endif
+                            @else
+                                <div class="p-4 bg-yellow-100 text-yellow-700 rounded-lg">
+                                    File uploaded successfully (Preview not available for this file type).
+                                </div>
+                            @endif
+
+                        </div>
+                    @endif
 
                     </div>
 

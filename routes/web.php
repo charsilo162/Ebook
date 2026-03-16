@@ -6,6 +6,7 @@ use App\Livewire\Vendor\Settings;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MyLibraryController;
 use App\Http\Controllers\OrderController;
 use App\Livewire\User\UserSettings;
@@ -34,7 +35,7 @@ Route::post('/logout', function () { Session::forget('user');
                 return redirect()->route('login');
             })->name('logout');
 
-
+ 
 
 Route::view('/', 'pages.home')->name('home');
 Route::view('/search', 'pages.home')->name('search');
@@ -43,6 +44,7 @@ Route::view('/book-list', 'pages.book-list')->name('book-list');
 Route::view('/contact', 'pages.contact')->name('contact');
 Route::get('/categories', [CategoryController::class, 'show'])->name('category.books');
 Route::get('/books/{uuid}', [BookController::class, 'show'])->name('books.show');
+Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
 
    // Users routes
 Route::middleware('sessionauth')->group(function () {
@@ -50,7 +52,8 @@ Route::middleware('sessionauth')->group(function () {
     Route::get('/my-library', [MyLibraryController::class, 'show'])->name('library.index');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     // User Library Page (The one you are building now)
-    Route::view('/dashboard', 'pages.dashboard')->name('dashboard');
+    // Route::view('/dashboard', 'pages.dashboard')->name('dashboard');
+
  
     Route::get('/dashboard/my-orders', function () {
         return view('users.my-order');
@@ -71,6 +74,7 @@ Route::middleware('sessionauth')->group(function () {
 
 
 // Admin Routes
+ Route::middleware('admin')->group(function () {
     Route::get('/admin/manage-books', function () {
         return view('pages.admin-manger');
     })->name('admin.books');
@@ -80,3 +84,4 @@ Route::middleware('sessionauth')->group(function () {
     Route::get('/admin/manage-category', function () {
         return view('pages.manage-category');
     })->name('admin.category');
+ });

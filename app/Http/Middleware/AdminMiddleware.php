@@ -17,9 +17,12 @@ class AdminMiddleware
         }
 
         // Your old logic — now works perfectly
-        if ($user['type'] === 'user') {
+        if ($user['type'] != 'admin') {
             return redirect()->route('dashboard');
         }
+        // if ($user['type'] === 'vendor') {
+        //     return redirect()->route('dashboard');
+        // }
 // dd($request);
         return $next($request);
     }

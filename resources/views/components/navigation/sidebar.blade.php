@@ -28,21 +28,26 @@
     {{-- Navigation Links --}}
     {{-- Note: Added @click="sidebarOpen = false" so it closes when a link is clicked on mobile --}}
     <nav class="flex-1 px-4 mt-8 space-y-2" @click="if(window.innerWidth < 1024) sidebarOpen = false">
-      @if ($user['type'] === 'vendor' || $user['type'] === 'admin')
+      @if ($user['type'] === 'admin')
         <x-navigation.sidebar-link href="/dashboard" icon="home" label="Dashboard" />
-        <x-navigation.sidebar-link href="{{ route('admin.category') }}" icon="tag" label="Manage Categories" />
-        <x-navigation.sidebar-link href="{{ route('admin.user') }}" icon="users" label="Manage Users" />
-        <x-navigation.sidebar-link href="/vendor/settings" icon="cog-6-tooth" label="Settings" />
         <x-navigation.sidebar-link href="{{ route('admin.books') }}" icon="book-open" label="Manage Books" />
+        <x-navigation.sidebar-link href="{{ route('admin.user') }}" icon="users" label="Manage Users" />
+        <x-navigation.sidebar-link href="{{ route('admin.category') }}" icon="tag" label="Manage Categories" />
+       @endif
+        @if ($user['type'] === 'vendor')
+
+        <x-navigation.sidebar-link href="/dashboard" icon="home" label="Dashboard" />
+        <x-navigation.sidebar-link href="/vendor/settings" icon="cog-6-tooth" label="Settings" />
         <x-navigation.sidebar-link href="{{ route('order.management') }}" icon="shopping-cart" label="Order Management" />
        @endif
-        @if ($user['type'] === 'user' || $user['type'] === 'vendor')
+        @if ($user['type'] === 'user')
+        {{-- @if ($user['type'] === 'user' || $user['type'] === 'vendor') --}}
             {{-- <x-navigation.sidebar-link href="{{ route('admin.users') }}" icon="users" label="Manage Users" /> --}}
         <x-navigation.sidebar-link href="{{ route('user.settings') }}" icon="user" label="Profile" />
         <x-navigation.sidebar-link href="{{ route('my.orders') }}" icon="shopping-cart" label="My Orders" />
         <x-navigation.sidebar-link href="{{ route('library.index') }}" icon="book-open" label="User Library" />
     
-@endif
+@endif 
 </nav>
     {{-- Logout --}}
    

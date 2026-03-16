@@ -32,7 +32,7 @@ class Login extends Component
             'email' => $this->email,
             'password' => $this->password,
         ]);
-           // dd($response);
+           //dd($response);
         // 3. Handle Errors (Invalid Credentials / Validation)
         if (isset($response['message']) && $response['message'] === 'Invalid credentials') {
             $this->addError('email', 'These credentials do not match our records.');
@@ -55,6 +55,9 @@ class Login extends Component
             // 5. Redirect based on role (Vendor vs Reader)
             $userType = $response['user']['type'] ?? null;
                     if ($userType === 'vendor') { 
+                        return redirect()->route('dashboard');
+                    }else
+                    if ($userType === 'admin') { 
                         return redirect()->route('dashboard');
                     }
 

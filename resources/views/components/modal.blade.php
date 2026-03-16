@@ -16,7 +16,7 @@
     x-data="{ open: @entangle($attributes->wire('model')) }"
     x-show="open"
     x-cloak
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-4"
 >
     <!-- Overlay -->
     <div
@@ -28,7 +28,8 @@
     <div
         x-show="open"
         x-transition
-        class="relative bg-white rounded-2xl shadow-xl w-full {{ $maxWidthClass }} mx-4 p-6"
+        class="relative bg-white rounded-2xl shadow-xl w-full {{ $maxWidthClass }} p-6 max-h-[90vh] overflow-y-auto"
+        {{-- class="relative bg-white rounded-2xl shadow-xl w-full {{ $maxWidthClass }} mx-4 p-6" --}}
     >
         {{ $slot }}
     </div>

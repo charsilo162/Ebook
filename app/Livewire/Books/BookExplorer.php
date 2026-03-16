@@ -58,7 +58,7 @@ public function render(ApiService $api)
         'page' => $this->paginators['page'] ?? 1,
         'per_page' => 15,
     ]);
-// dd($response['data']);
+    // dd($response['data']);
     return view('livewire.books.book-explorer', [
         'books' => $response['data'] ?? [],
         'meta'  => $response['meta'] ?? [],

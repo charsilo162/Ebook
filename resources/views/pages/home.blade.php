@@ -66,32 +66,10 @@
 />
 
 <x-sections.site-footer
-    :columns="[
-        [
-            'Corporate Info',
-            'Accessibility',
-            'Jobs',
-            
-        ],
-        [
-            'NBC App',
-            'Peacock',
-            'Advertise',
-            'Closed Captioning',
-        ],
-        [
-           
-            'FAQ',
-            'Casting',
-            'Contact Us',
-           
-        ],
-        [
-            'Parental Guidelines and TV Ratings',
-            'Video Viewing Policy',
-            'Viewer Panel',
-            'Shop',
-        ],
+    :links="[
+        // ['label' => 'About Us', 'route' => 'about-us'],
+        ['label' => 'Contact Us', 'route' => 'contact'],
+        ['label' => 'Categories', 'route' => 'category.books'],
     ]"
 />
 

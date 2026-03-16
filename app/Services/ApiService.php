@@ -109,7 +109,19 @@ class ApiService
         } else {
             // --- JSON/Form-URL-Encoded LOGIC (No file) ---
             $fields = collect($formData)->pluck('contents', 'name')->all();
-            return $request->asForm()->$method($url, $fields)->throw()->json();
+            // return $request->asForm()->$method($url, $fields)->throw()->json();
+            $response = $request->asForm()->$method($url, $fields);
+
+                if ($response->status() === 422) {
+                    return [
+                        'error'   => true,
+                        'status'  => 422,
+                        'message' => $response->json('message'),
+                        'errors'  => $response->json('errors'),
+                    ];
+                }
+
+                return $response->json();
         }
     }
 
@@ -182,11 +194,11 @@ class ApiService
             'success' => true,
             'data' => $response,
         ];
-    }
+    } 
 
    public function getFilteredBooks(array $filters = [])
 {
-    logger()->info('BOOK FILTERS SENT', $filters);
+   // logger()->info('BOOK FILTERS SENT', $filters);
 
     return $this->get('books', array_filter([
         'search'      => $filters['search'] ?? null,
