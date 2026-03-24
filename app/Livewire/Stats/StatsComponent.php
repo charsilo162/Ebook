@@ -4,11 +4,15 @@ namespace App\Livewire\Stats;
 
 use App\Services\ApiService;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class StatsComponent extends Component
 {
     public $stats = [];
-
+    public function refreshStats()
+        {
+            // This can be empty; just calling it triggers a re-render
+        }
     public function render(ApiService $api)
     {
         // Fetch stats from the API endpoint

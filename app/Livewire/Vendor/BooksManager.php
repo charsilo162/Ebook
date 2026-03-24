@@ -436,6 +436,8 @@ public function save()
             $this->showModal = false;
             $this->resetForm();
             $this->loadBooks();
+            // $this->dispatch('book-saved');
+            return redirect(request()->header('Referer'));
             session()->flash('success', 'Book saved successfully!');
         }
      public function render()

@@ -54,6 +54,7 @@
                 <tr>
                     <th class="py-4 px-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Book Details</th>
                     <th class="py-4 px-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Customer</th>
+                    <th class="py-4 px-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Type</th>
                     <th class="py-4 px-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Status</th>
                     <th class="py-4 px-4 text-right text-[10px] font-bold uppercase tracking-widest text-zinc-500">Amount</th>
                     <th class="py-4 px-4"></th>

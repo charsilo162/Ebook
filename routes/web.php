@@ -9,6 +9,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MyLibraryController;
 use App\Http\Controllers\OrderController;
+use App\Livewire\Auth\ForgotPassword;
+use App\Livewire\Auth\ResetPassword;
 use App\Livewire\User\UserSettings;
 use Illuminate\Support\Facades\Session;
 
@@ -28,6 +30,10 @@ use Illuminate\Support\Facades\Session;
 
 
 // });
+Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');
+
+Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
+
 Route::get('/signup',UnifiedSignup::class)->name('signup');
 Route::get('/login',Login::class)->name('login');
 Route::post('/logout', function () { Session::forget('user');

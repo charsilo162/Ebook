@@ -16,11 +16,18 @@
             </div>
         </div>
     </td>
-    
+    @php
+        // @if ($order['order_type'] == 'digital')
+        // dd($order['order_type'])
+    @endphp
     {{-- 2. Customer Details --}}
     <td class="py-4 px-4">
         <p class="text-sm text-zinc-700 font-medium">{{ $order['customer']['name'] }}</p>
+        
         <p class="text-xs text-zinc-500">{{ $order['created_at'] }}</p>
+    </td>
+    <td>
+        <p class="text-sm text-zinc-700 font-medium">{{ $order['order_type'] . " copy" }} </p>
     </td>
 
     {{-- 3. Dynamic Status Badge --}}
@@ -43,7 +50,9 @@
     </td>
 
     {{-- 5. Vendor Actions --}}
+    
     <td class="py-4 px-4 text-right">
+        @if ($order['order_type'] != 'digital')
         @if($isVendor)
             <div class="flex justify-end items-center gap-2">
                 {{-- Quick Status Selector --}}
@@ -71,6 +80,7 @@
             <a href="{{ route('orders.show', $order['id']) }}" class="text-xs font-semibold text-purple-600 hover:underline">
                 View Details
             </a>
+        @endif
         @endif
     </td>
 </tr>

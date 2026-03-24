@@ -19,7 +19,7 @@
             <div>
                 <div class="flex justify-between items-center ml-1">
                     <label class="text-xs font-black text-zinc-400 uppercase tracking-widest">Password</label>
-                    <a href="#" class="text-[10px] font-bold text-purple-600 uppercase tracking-widest">Forgot?</a>
+                    <a href="{{ route("password.request") }}" class="text-[10px] font-bold text-purple-600 uppercase tracking-widest">Forgot?</a>
                 </div>
                 <input type="password" wire:model="password" class="w-full mt-2 p-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-600 transition-all" placeholder="••••••••">
                 @error('password') <span class="text-red-500 text-xs mt-1 ml-1 block font-bold">{{ $message }}</span> @enderror
