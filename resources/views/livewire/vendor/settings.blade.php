@@ -149,22 +149,65 @@
             <div>
                 <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Address</label>
                 <input type="text" wire:model="address" placeholder="Street Address" class="w-full mt-1 p-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-600">
+                @error('address') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
             
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">City</label>
-                    <input type="text" wire:model="city" placeholder="City" class="w-full mt-1 p-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-600">
+                    <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">City/PO Box</label>
+                    <input type="text" wire:model="city" placeholder="City/PO Box" class="w-full mt-1 p-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-600">
+                    @error('city') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">State</label>
-                    <input type="text" wire:model="state" placeholder="State" class="w-full mt-1 p-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-600">
+                    <select wire:model="state" class="w-full mt-1 p-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-600">
+                        <option value="">Select State</option>
+                        <option value="Abia">Abia</option>
+                        <option value="Adamawa">Adamawa</option>
+                        <option value="Akwa Ibom">Akwa Ibom</option>
+                        <option value="Anambra">Anambra</option>
+                        <option value="Bauchi">Bauchi</option>
+                        <option value="Bayelsa">Bayelsa</option>
+                        <option value="Benue">Benue</option>
+                        <option value="Borno">Borno</option>
+                        <option value="Cross River">Cross River</option>
+                        <option value="Delta">Delta</option>
+                        <option value="Ebonyi">Ebonyi</option>
+                        <option value="Edo">Edo</option>
+                        <option value="Ekiti">Ekiti</option>
+                        <option value="Enugu">Enugu</option>
+                        <option value="FCT">FCT (Abuja)</option>
+                        <option value="Gombe">Gombe</option>
+                        <option value="Imo">Imo</option>
+                        <option value="Jigawa">Jigawa</option>
+                        <option value="Kaduna">Kaduna</option>
+                        <option value="Kano">Kano</option>
+                        <option value="Katsina">Katsina</option>
+                        <option value="Kebbi">Kebbi</option>
+                        <option value="Kogi">Kogi</option>
+                        <option value="Kwara">Kwara</option>
+                        <option value="Lagos">Lagos</option>
+                        <option value="Nasarawa">Nasarawa</option>
+                        <option value="Niger">Niger</option>
+                        <option value="Ogun">Ogun</option>
+                        <option value="Ondo">Ondo</option>
+                        <option value="Osun">Osun</option>
+                        <option value="Oyo">Oyo</option>
+                        <option value="Plateau">Plateau</option>
+                        <option value="Rivers">Rivers</option>
+                        <option value="Sokoto">Sokoto</option>
+                        <option value="Taraba">Taraba</option>
+                        <option value="Yobe">Yobe</option>
+                        <option value="Zamfara">Zamfara</option>
+                    </select>
+                    @error('state') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
             </div>
 
             <div>
                 <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Contact Phone</label>
                 <input type="text" wire:model="phone" placeholder="Branch Phone" class="w-full mt-1 p-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-600">
+                @error('phone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
 
             <div class="flex gap-4 pt-4">

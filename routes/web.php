@@ -13,6 +13,9 @@ use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\ResetPassword;
 use App\Livewire\User\UserSettings;
 use Illuminate\Support\Facades\Session;
+use App\Livewire\AffiliateDashboard;
+use App\Livewire\Admin\PayoutManager;
+use App\Livewire\Admin\AffiliateOverview;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -90,4 +93,29 @@ Route::middleware('sessionauth')->group(function () {
     Route::get('/admin/manage-category', function () {
         return view('pages.manage-category');
     })->name('admin.category');
+
  });
+
+ // --- USER ROUTES ---
+Route::middleware(['sessionauth'])->group(function () {
+    // User's own referral and withdrawal page
+        Route::get('/affiliate-center', function () {
+        return view('pages.affiliate');
+    })->name('affiliate.dashboard');
+    // Route::get('/affiliate-center', AffiliateDashboard::class)->name('affiliate.dashboard');
+});
+
+// --- ADMIN ROUTES ---
+Route::middleware(['admin'])->group(function () {
+    // Page to manage and approve withdrawal requests
+        Route::get('/admin/payouts', function () {
+        return view('pages.payouts');
+    })->name('admin.payouts');
+   // Route::get('/admin/payouts', PayoutManager::class)->name('admin.payouts');
+    
+    // Page to see all balances, logs, and change commission rates
+            Route::get('/admin/affiliate-overview', function () {
+        return view('pages.affiliate-overview');
+    })->name('admin.overview');
+    // Route::get('/admin/affiliate-overview', AffiliateOverview::class)->name('admin.overview');
+});

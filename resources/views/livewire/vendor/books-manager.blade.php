@@ -4,12 +4,12 @@
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-bold">Your Uploads</h2>
 
-        <button
-            wire:click="openModal"
-            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-        >
-            Upload a book
-        </button> 
+       <button
+    wire:click="openModal"
+    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition cursor-pointer"
+>
+    Upload a book
+</button>
     </div>
 
 
@@ -327,7 +327,7 @@
                                 <div class="flex justify-between text-xs py-1">
                                     <span>{{ ucfirst($v['type']) }} copy:</span>
                                     <span class="text-purple-400 font-bold">
-                                    ${{ number_format((float)($v['price'] ?? 0), 2) }}                                    </span>
+                                    ₦{{ number_format((float)($v['price'] ?? 0), 2) }}                                    </span>
                                 </div>
                             @endforeach
                         </div>

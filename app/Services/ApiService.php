@@ -208,4 +208,40 @@ class ApiService
     ]));
 }
 
+        public function getAffiliateStats()
+        {
+            return $this->get('affiliate/stats');
+        }
+
+        public function requestWithdrawal($data)
+        {
+            // $data should include amount, bank_name, account_number, account_name
+            return $this->post('affiliate/withdraw', $data);
+        }
+
+        public function getAllWithdrawals()
+        {
+            return $this->get('admin/withdrawals');
+        }
+
+        public function updateWithdrawalStatus($id, $status)
+        {
+            return $this->post("admin/withdrawals/{$id}/status", ['status' => $status]);
+        }
+
+        public function getAffiliateBalances()
+            {
+                return $this->get('admin/affiliate/balances');
+            }
+
+            public function getCommissionLogs()
+            {
+                return $this->get('admin/affiliate/logs');
+            }
+
+            public function updateCommissionRate($rate)
+            {
+                return $this->post('admin/affiliate/settings', ['rate' => $rate]);
+            }
+
 }

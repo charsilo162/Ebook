@@ -15,7 +15,7 @@ class UnifiedSignup extends Component
 
     // Common Fields
     public $first_name, $last_name, $email, $phone, $password, $photo;
-
+        public $referred_by; 
     // Vendor Specific Fields
     public $store_name, $bio;
 
@@ -26,13 +26,16 @@ class UnifiedSignup extends Component
         $this->api = $api; 
     }
 
-    public function mount()
+        public function mount()
     {
-        // Check if user is already logged in
         if (Session::has('api_token')) {
             return redirect()->route('dashboard');
         }
+
+        // 2. Capture the 'ref' parameter from the URL (e.g., /register?ref=CODE)
+        $this->referred_by = request()->query('ref');
     }
+
 
     public function setRole($role)
     {
@@ -40,23 +43,35 @@ class UnifiedSignup extends Component
         $this->resetValidation();
     }
 
-    private function validationRules() 
-    {
-        $rules = [
-            'first_name' => 'required|string|max:50',
-            'last_name'  => 'required|string|max:50',
-            'email'      => 'required|email',
-            'password'   => 'required|min:8',
-        ];
+private function validationRules()
+{
+    $rules = [
+        'first_name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
+        'last_name'  => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
+        'email'      => 'required|email',
+        'password'   => [
+            'required',
+            'min:8',
+            'regex:/[a-z]/',      // at least one lowercase letter
+            'regex:/[A-Z]/',      // at least one uppercase letter
+            'regex:/[0-9]/',      // at least one number
+            'regex:/[^A-Za-z0-9]/', // at least one special character
+        ],
+    ];
 
-        if ($this->role === 'vendor') {
-            $rules['store_name'] = 'required|string|min:3';
-            $rules['bio']        = 'nullable|string|max:500';
-        }
-
-        return $rules;
+    if ($this->role === 'vendor') {
+        $rules['store_name'] = 'required|string|min:3';
+        $rules['bio']        = 'nullable|string|max:500';
     }
 
+    return $rules;
+}
+protected $messages = [
+    'first_name.regex' => 'First name may only contain letters and spaces.',
+    'last_name.regex'  => 'Last name may only contain letters and spaces.',
+    'password.min'     => 'Password must be at least 8 characters.',
+    'password.regex'   => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+];
     public function signup()
     {
         $this->validate($this->validationRules());
@@ -75,7 +90,10 @@ class UnifiedSignup extends Component
             $payload[] = ['name' => 'store_name', 'contents' => $this->store_name];
             $payload[] = ['name' => 'bio',        'contents' => $this->bio];
         }
-
+      // 3. Add 'referred_by' to the payload if it exists
+        if ($this->referred_by) {
+            $payload[] = ['name' => 'referred_by', 'contents' => $this->referred_by];
+        }
         // Handle Photo Upload to API
         if ($this->photo) {
             $payload[] = [
@@ -114,4 +132,4 @@ class UnifiedSignup extends Component
     {
         return view('livewire.auth.unified-signup')->layout('layouts.auth');
     }
-}
+} 

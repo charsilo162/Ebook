@@ -87,6 +87,36 @@
                         @enderror
                     </div>
 
+                    <hr class="border-zinc-100">
+
+                    <div class="space-y-6">
+                        <h3 class="text-sm font-black text-purple-600 uppercase tracking-[0.2em]">Payout / Bank Details</h3>
+                        <p class="text-xs text-zinc-500 -mt-4">This information is used when you request a withdrawal.</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-xs font-black text-zinc-400 uppercase tracking-widest">Bank Name</label>
+                                <input type="text" wire:model="bank_name" placeholder="e.g. Kuda, GTB" 
+                                    class="w-full mt-2 p-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition">
+                                @error('bank_name') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-black text-zinc-400 uppercase tracking-widest">Account Number</label>
+                                <input type="text" wire:model="account_number" placeholder="10 Digits" 
+                                    class="w-full mt-2 p-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition">
+                                @error('account_number') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-black text-zinc-400 uppercase tracking-widest">Account Holder Name</label>
+                            <input type="text" wire:model="account_name" placeholder="Full Name on Bank Account" 
+                                class="w-full mt-2 p-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition">
+                            @error('account_name') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
                     <div x-show="userType === 'vendor'" class="space-y-6">
                         <h3 class="text-sm font-black text-purple-600 uppercase tracking-[0.2em]">Vendor Settings</h3>
                         
